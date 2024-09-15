@@ -1,0 +1,107 @@
+unknown_error: An unknown error occurred
+birthday_embed_title: Today is someone's birthday!
+birthday_embed_description: Say happy birthday to <@{user_id}> 🎂🎂!
+message_reminder_embed_description: "[Go to message]({message_url})\nCreated at: {created_at}"
+reminder_embed_description: "Created at: {created_at}"
+birthday_modal_title: Set Birthday Date
+birthday_modal_month_label: Month
+birthday_modal_day_label: Day
+invalid_input_title: Invalid Input
+invalid_input_description: The input {value} is invalid, please try again.
+birthday_complete_embed_title: Birthday Set
+birthday_complete_embed_description: <@{user_id}>'s birthday has been set to {dt}
+birthday_removed_embed_title: Birthday Removed
+birthday_removed_embed_description: <@{user_id}>'s birthday has been removed
+birthday_set_command_description: Set someone's birthday
+birthday_remove_command_description: Remove someone's birthday
+set_birthday_ctx_menu_name: Set birthday
+user_parameter_name: user
+day_parameter_name: day
+month_parameter_name: month
+did_not_set_birthday_title: Birthday not set for This User
+did_not_set_birthday_description: You have not set a birthday for <@{user_id}> yet
+birthday_list_command_description: List all birthdays you have set
+no_birthdays_title: No Birthdays Set
+birthday_group_name: birthday
+birthday_set_command_name: set
+birthday_remove_command_name: remove
+birthday_list_command_name: list
+settings_saved_embed_title: Settings Saved
+lang_name: English
+lang_param_name: language
+timezone_param_name: timezone
+timezone_command_description: Set your timezone
+language_command_description: Set the language of the bot's responses
+birthday_list_embed_title: Birthdays
+reminder_group_name: reminder
+set_reminder_ctx_menu_name: Set reminder
+reminder_modal_time_label: Remind me...
+reminder_modal_time_placeholder: in 1 hour/next Wednesday/at 3pm
+reminder_created_embed_title: Reminder Created
+reminder_created_embed_description: I will remind you {dt}
+reminder_removed_embed_title: Reminder Removed
+reminder_list_embed_title: Reminders
+reminder_list_command_description: List all reminders you have set
+reminder_remove_command_description: Remove a reminder
+reminder_set_command_description: Set a reminder
+when_parameter_name: when
+text_parameter_name: text
+text_param_description_reminder: What do you want to be reminded of?
+text_param_description_todo: What do you need to do?
+remove_birthday_ctx_menu_name: Remove birthday
+no_reminders_title: No Reminders Set
+reminder_parameter_name: reminder
+reminder_not_found_title: Reminder Not Found
+timezone_param_description: Enter a number between -12 and 14
+todo_modal_text_label: I need to...
+todo_modal_text_placeholder: buy milk/call mom/finish project
+todo_group_name: todo
+add_todo_ctx_menu_name: Add to to-do list
+todo_created_embed_title: To-Do Added
+todo_created_embed_description: "{text} is added to your to-do list"
+todo_list_embed_title: To-Do List
+paginator_footer: "Page: {page}/{total}"
+todo_add_command_name: add
+todo_add_command_description: Add a task to your to-do list
+todo_done_command_name: done
+todo_done_command_description: Mark a task as done
+task_parameter_name: task
+todo_done_embed_title: 🎉 Congratulations!
+todo_done_embed_description: "You have completed the task: {text}"
+todo_not_found_title: Task Not Found
+no_tasks_title: Wow! You have no tasks left
+todo_list_command_description: List all tasks in your to-do list
+yes_text: "Yes"
+no_text: "No"
+show_done_tasks_parameter_name: show-done
+show_done_tasks_param_description: Show completed tasks
+todo_remove_command_description: Remove a task from your to-do list
+todo_removed_embed_title: Task Removed
+todo_removed_embed_description: "{text} is removed from your to-do list"
+no_content: "(No content)"
+notes_group_name: notes
+save_to_notes_ctx_menu_name: Save to notes
+notes_modal_title_label: Title
+notes_modal_untitled: Untitled
+notes_modal_content_label: Content
+notes_modal_title: Write a new Note
+notes_created_embed_title: Note Created
+notes_created_embed_description: "{title} is saved to your notes"
+notes_write_command_name: write
+notes_write_command_description: Write a new note
+notes_list_command_description: List all notes
+notes_remove_command_description: Remove a note
+note_parameter_name: note
+no_notes_title: You don't have any notes
+note_not_found_title: Note Not Found
+notes_removed_embed_title: Note Removed
+notes_removed_embed_description: "{title} is removed from your notes"
+notes_read_command_name: read
+notes_read_command_description: Read a note
+notes_list_embed_title: Your Notes
+select_month_first: Select a month first
+leap_year_notify_embed_title: How would you like to be notified?
+leap_year_notify_embed_description: On a non-leap year, February 29th doesn't exist
+notify_on_mar_1: Notify me on March 1st
+notify_on_feb_28: Notify me on February 28th
+dont_notify: Don't notify me

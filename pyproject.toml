@@ -1,0 +1,22 @@
+[project]
+authors = [{email = "seria.ati@gmail.com", name = "seriaati"}]
+dependencies = [
+  "aiofiles>=24.1.0",
+  "discord-py>=2.4.0",
+  "jishaku>=2.5.2",
+  "loguru>=0.7.2",
+  "parsedatetime>=2.6",
+  "python-dotenv>=1.0.1",
+  "pyyaml>=6.0.2",
+  "tortoise-orm>=0.21.6",
+]
+description = "Your life organizer on Discord."
+license = {file = "LICENSE"}
+name = "lumina"
+readme = "README.md"
+requires-python = ">=3.11"
+version = "0.1.0"
+
+[tool.pyright]
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
