@@ -55,3 +55,8 @@ Write down your thoughts, ideas, and anything you want to remember. Right click 
 - `/notes list`
 - `/notes remove`
 - `/notes read`
+
+# Questions, Issues, Feedback, Contributions
+
+Whether you want to make any bug reports, feature requests, or contribute to translations, simply open an issue or pull request in this repository.  
+If GitHub is not your type, you can find me on [Discord](https://discord.com/invite/b22kMKuwbS), my username is @seria_ati.
