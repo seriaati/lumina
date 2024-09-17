@@ -130,7 +130,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
         description=app_commands.locale_str(
-            "todo_list_command_description", key="todo_list_command_description"
+            "List all tasks in your to-do list", key="todo_list_command_description"
         ),
     )
     @app_commands.rename(
