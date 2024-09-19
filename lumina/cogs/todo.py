@@ -105,6 +105,27 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         )
 
     @todo_done.autocomplete("task_id")
+    async def task_done_task_id_autocomplete(
+        self, i: Interaction, current: str
+    ) -> list[app_commands.Choice[int]]:
+        tasks = await TodoTask.filter(user_id=i.user.id, done=False).all()
+
+        if not tasks:
+            return [
+                app_commands.Choice(
+                    name=i.client.translator.translate(
+                        LocaleStr("no_tasks_title"), locale=await get_locale(i)
+                    ),
+                    value=-1,
+                )
+            ]
+
+        return [
+            app_commands.Choice(name=shorten_text(task.text, 100), value=task.id)
+            for task in tasks
+            if current.lower() in task.text.lower()
+        ][:25]
+
     @todo_remove.autocomplete("task_id")
     async def task_id_autocomplete(
         self, i: Interaction, current: str
