@@ -20,3 +20,6 @@ version = "0.1.0"
 [tool.pyright]
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
+typeCheckingMode = "standard"
+venv = ".venv"
+venvPath = "."
