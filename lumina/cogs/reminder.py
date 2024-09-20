@@ -11,7 +11,7 @@ from discord.ext import commands
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoRemindersError, ReminderNotFoundError
 from lumina.l10n import LocaleStr
-from lumina.models import LuminaUser, Reminder, get_locale
+from lumina.models import Reminder, get_locale, get_timezone
 from lumina.utils import get_now, shorten_text, split_list_to_chunks
 
 if TYPE_CHECKING:
@@ -39,10 +39,12 @@ class ReminderCog(
         )
 
     @staticmethod
-    def natural_language_to_datetime(time: str) -> datetime.datetime:
+    def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
         cal = parsedatetime.Calendar()
-        time_struct, _ = cal.parse(time, get_now(0))
-        return datetime.datetime(*time_struct[:6]).replace(tzinfo=datetime.UTC)
+        time_struct, _ = cal.parse(time, get_now(timezone))
+        return datetime.datetime(*time_struct[:6]).replace(
+            tzinfo=datetime.timezone(datetime.timedelta(hours=timezone))
+        )
 
     async def cog_load(self) -> None:
         self.bot.tree.add_command(self.set_reminder_ctx_menu)
@@ -63,8 +65,8 @@ class ReminderCog(
         if modal.incomplete:
             return
 
-        dt = self.natural_language_to_datetime(modal.time.value)
-        timezone = (await LuminaUser.get_or_create(id=i.user.id))[0].timezone
+        timezone = await get_timezone(i.user.id)
+        dt = self.natural_language_to_dt(modal.time.value, timezone)
 
         reminder = await Reminder.create(
             text=message.content
@@ -73,8 +75,10 @@ class ReminderCog(
             user_id=i.user.id,
             message_url=message.jump_url,
         )
+        await self.bot.scheduler.schedule_reminder()
+
         await i.followup.send(
-            embed=reminder.get_created_embed(i.client.translator, locale, timezone), ephemeral=True
+            embed=reminder.get_created_embed(i.client.translator, locale), ephemeral=True
         )
 
     @app_commands.command(
@@ -93,12 +97,14 @@ class ReminderCog(
     async def reminder_set(self, i: Interaction, when: str, text: str) -> None:
         await i.response.defer(ephemeral=True)
 
-        dt = self.natural_language_to_datetime(when)
-        timezone = (await LuminaUser.get_or_create(id=i.user.id))[0].timezone
+        timezone = await get_timezone(i.user.id)
+        dt = self.natural_language_to_dt(when, timezone)
 
         reminder = await Reminder.create(text=text, datetime=dt, user_id=i.user.id)
+        await self.bot.scheduler.schedule_reminder()
+
         await i.followup.send(
-            embed=reminder.get_created_embed(i.client.translator, await get_locale(i), timezone),
+            embed=reminder.get_created_embed(i.client.translator, await get_locale(i)),
             ephemeral=True,
         )
 
@@ -111,18 +117,20 @@ class ReminderCog(
     @app_commands.rename(
         reminder_id=app_commands.locale_str("reminder", key="reminder_parameter_name")
     )
-    async def birthday_remove(self, i: Interaction, reminder_id: int) -> None:
+    async def reminder_remove(self, i: Interaction, reminder_id: int) -> None:
         reminder = await Reminder.get_or_none(id=reminder_id)
         if reminder is None:
             raise ReminderNotFoundError
 
         await reminder.delete()
+        await self.bot.scheduler.schedule_reminder()
+
         await i.response.send_message(
             embed=reminder.get_removed_embed(i.client.translator, await get_locale(i)),
             ephemeral=True,
         )
 
-    @birthday_remove.autocomplete("reminder_id")
+    @reminder_remove.autocomplete("reminder_id")
     async def reminder_id_autocomplete(
         self, i: Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
@@ -150,7 +158,7 @@ class ReminderCog(
             "List all reminders you have set", key="reminder_list_command_description"
         ),
     )
-    async def birthday_list(self, i: Interaction) -> None:
+    async def reminder_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
 
         reminders = await Reminder.filter(user_id=i.user.id).all()
@@ -158,18 +166,13 @@ class ReminderCog(
             raise NoRemindersError
 
         split_reminders = split_list_to_chunks(reminders, 10)
-        timezone = (await LuminaUser.get_or_create(id=i.user.id))[0].timezone
         locale = await get_locale(i)
         embeds: list[DefaultEmbed] = []
 
         for index, bdays in enumerate(split_reminders):
             embeds.append(
                 Reminder.get_list_embed(
-                    i.client.translator,
-                    locale,
-                    reminders=bdays,
-                    timezone=timezone,
-                    start=1 + index * 10,
+                    i.client.translator, locale, reminders=bdays, start=1 + index * 10
                 )
             )
 

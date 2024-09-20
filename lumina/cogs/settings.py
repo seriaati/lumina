@@ -65,6 +65,7 @@ class SettingsCog(commands.Cog):
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         user.timezone = timezone
         await user.save(update_fields=("timezone",))
+        await self.bot.scheduler.schedule_reminder()
 
         embed = user.get_settings_saved_embed(i.client.translator, await get_locale(i))
         await i.followup.send(embed=embed, ephemeral=True)

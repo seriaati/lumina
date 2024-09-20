@@ -3,64 +3,64 @@ from __future__ import annotations
 import calendar
 from typing import TYPE_CHECKING
 
-import discord
 from discord.ext import commands, tasks
 from loguru import logger
 
-from lumina.models import LuminaUser
+from lumina.constants import DEFAULT_LOCALE
+from lumina.models import Birthday, LuminaUser
 from lumina.utils import get_now
 
 if TYPE_CHECKING:
     from lumina.bot import Lumina
 
 
-class ReminderCog(commands.Cog):
+class ScheduleCog(commands.Cog):
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
-        self.send_notifications.start()
+        self.notify_birthdays.start()
 
     async def cog_unload(self) -> None:
-        self.send_notifications.cancel()
+        self.notify_birthdays.cancel()
 
-    @tasks.loop(minutes=1)
-    async def send_notifications(self) -> None:
-        default_locale = discord.Locale.american_english
-        users = await LuminaUser.all().prefetch_related("birthdays", "reminders")
+    @tasks.loop(hours=1)
+    async def notify_birthdays(self) -> None:
+        timezones: list[int] = (
+            await LuminaUser.filter().distinct().values_list("timezone", flat=True)  # pyright: ignore[reportAssignmentType]
+        )
 
-        for user in users:
-            now = get_now(user.timezone)
+        for timezone in timezones:
+            now = get_now(timezone)
             is_leap_year = calendar.isleap(now.year)
 
-            for bday in user.birthdays:
-                if (bday.month == now.month and bday.day == now.day) or (  # noqa: PLR0916
-                    (
-                        (bday.month, bday.day) == (2, 29)
-                        and not is_leap_year
-                        and (bday.leap_year_notify_month, bday.leap_year_notify_day)
-                        == (now.month, now.day)
-                    )
-                    and bday.last_notify_year != now.year
+            birthdays = await Birthday.filter(
+                month=now.month, day=now.day, user__timezone=timezone, last_notify_year__lt=now.year
+            ).all()
+
+            for birthday in birthdays:
+                if (
+                    (birthday.month, birthday.day) == (2, 29)
+                    and not is_leap_year
+                    and (birthday.leap_year_notify_month, birthday.leap_year_notify_day)
+                    != (now.month, now.day)
                 ):
-                    embed = bday.get_embed(self.bot.translator, user.locale or default_locale)
-                    logger.info(f"Sending birthday reminder to {bday.bday_user_id}")
-                    success = await self.bot.dm_user(user.id, embed=embed)
-                    if success:
-                        bday.last_notify_year = now.year
-                        await bday.save(update_fields=("last_notify_year",))
+                    continue
 
-            for reminder in user.reminders:
-                if reminder.get_adjusted_datetime(user) <= now:
-                    embed = reminder.get_embed(self.bot.translator, user.locale or default_locale)
-                    success = await self.bot.dm_user(user.id, embed=embed)
-                    if success:
-                        await reminder.delete()
+                logger.info(f"Sending birthday reminder to {birthday.bday_user_id}")
+                await birthday.fetch_related("user")
+                embed = birthday.get_embed(
+                    self.bot.translator, birthday.user.locale or DEFAULT_LOCALE
+                )
+                success = await self.bot.dm_user(birthday.user_id, embed=embed)
+                if success:
+                    birthday.last_notify_year = now.year
+                    await birthday.save(update_fields=("last_notify_year",))
 
-    @send_notifications.before_loop
+    @notify_birthdays.before_loop
     async def before_run_reminders(self) -> None:
         await self.bot.wait_until_ready()
 
 
 async def setup(bot: Lumina) -> None:
-    await bot.add_cog(ReminderCog(bot))
+    await bot.add_cog(ScheduleCog(bot))

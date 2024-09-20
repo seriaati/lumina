@@ -62,12 +62,8 @@ async def absolute_edit(
         await i.response.edit_message(**kwargs)
 
 
-def astimezone(dt: datetime.datetime, tz: int) -> datetime.datetime:
-    return dt.astimezone(datetime.timezone(datetime.timedelta(hours=tz)))
-
-
 def get_now(timezone: int) -> datetime.datetime:
-    return astimezone(datetime.datetime.now(), timezone)
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=timezone)))
 
 
 def shorten_text(text: str, max_length: int) -> str:

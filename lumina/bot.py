@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import pathlib
 from typing import TYPE_CHECKING
 
@@ -9,16 +10,55 @@ from loguru import logger
 from tortoise import Tortoise
 
 from lumina.command_tree import CommandTree
+from lumina.constants import DEFAULT_LOCALE
 from lumina.error_handler import create_error_embed
 from lumina.l10n import AppCommandTranslator, Translator
+from lumina.models import Reminder
+from lumina.utils import get_now
 
 if TYPE_CHECKING:
     from lumina.embeds import ErrorEmbed
 
 
+class ReminderScheduler:
+    def __init__(self, bot: Lumina) -> None:
+        self.bot = bot
+        self.current_task: asyncio.Task | None = None
+
+    async def send_reminder(self, reminder: Reminder) -> None:
+        logger.info(f"Sending reminder to {reminder.user_id}")
+        embed = reminder.get_embed(self.bot.translator, reminder.user.locale or DEFAULT_LOCALE)
+        success = await self.bot.dm_user(reminder.user_id, embed=embed)
+        if success:
+            await reminder.delete()
+
+    async def get_next_reminder(self) -> Reminder | None:
+        return await Reminder.all().order_by("datetime").first().prefetch_related("user")
+
+    async def sleep_task(self, reminder: Reminder) -> None:
+        now = get_now(reminder.user.timezone)
+        await asyncio.sleep((reminder.datetime - now).total_seconds())
+        await self.send_reminder(reminder)
+
+    async def schedule_reminder(self) -> None:
+        self.cancel_task()
+
+        reminder = await self.get_next_reminder()
+        if reminder is None:
+            return
+
+        self.current_task = asyncio.create_task(self.sleep_task(reminder))
+
+    def cancel_task(self) -> None:
+        if self.current_task is not None:
+            self.current_task.cancel()
+            self.current_task = None
+
+
 class Lumina(commands.Bot):
     def __init__(self) -> None:
         self.translator = Translator()
+        self.scheduler = ReminderScheduler(self)
 
         super().__init__(
             command_prefix=commands.when_mentioned,
@@ -71,6 +111,7 @@ class Lumina(commands.Bot):
         await self._load_cogs()
 
         await self.tree.set_translator(AppCommandTranslator(self.translator))
+        await self.scheduler.schedule_reminder()
 
     def create_error_embed(
         self, error: Exception, *, locale: discord.Locale

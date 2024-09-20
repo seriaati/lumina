@@ -9,7 +9,7 @@ from tortoise import Model, fields
 
 from lumina.embeds import DefaultEmbed
 from lumina.l10n import LocaleStr, Translator
-from lumina.utils import astimezone, get_now, next_leap_year, shorten_text
+from lumina.utils import get_now, next_leap_year, shorten_text
 
 if TYPE_CHECKING:
     import datetime
@@ -57,6 +57,8 @@ class Birthday(BaseModel):
     user: fields.ForeignKeyRelation[LuminaUser] = fields.ForeignKeyField(
         "models.LuminaUser", related_name="birthdays"
     )
+    user_id: fields.BigIntField
+
     month = fields.IntField()
     day = fields.IntField()
 
@@ -163,12 +165,10 @@ class Reminder(BaseModel):
     text = fields.TextField()
     datetime = fields.DatetimeField()
     """The time to remind the user in UTC."""
-    user = fields.ForeignKeyField("models.LuminaUser", related_name="reminders")
+    user: fields.ForeignKeyRelation[LuminaUser] = fields.ForeignKeyField("models.LuminaUser", related_name="reminders")
+    user_id: fields.BigIntField
     created_at = fields.DatetimeField(auto_now_add=True)
     message_url: fields.Field[str | None] = fields.TextField(null=True)
-
-    def get_adjusted_datetime(self, user: LuminaUser) -> datetime.datetime:
-        return astimezone(self.datetime, user.timezone)
 
     def get_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         if self.message_url is not None:
@@ -188,40 +188,35 @@ class Reminder(BaseModel):
             description=LocaleStr(locale_str_key, params=params),
         )
 
-    def get_created_embed(
-        self, translator: Translator, locale: discord.Locale, timezone: int
-    ) -> DefaultEmbed:
+    def get_created_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
             translator=translator,
             locale=locale,
             title=LocaleStr("reminder_created_embed_title"),
             description=LocaleStr(
                 "reminder_created_embed_description",
-                params={"dt": discord.utils.format_dt(astimezone(self.datetime, timezone), "R")},
+                params={"dt": discord.utils.format_dt(self.datetime, "R")},
             ),
         )
 
-    @staticmethod
-    def get_removed_embed(translator: Translator, locale: discord.Locale) -> DefaultEmbed:
+    def get_removed_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
-            translator=translator, locale=locale, title=LocaleStr("reminder_removed_embed_title")
+            translator=translator,
+            locale=locale,
+            title=LocaleStr("reminder_removed_embed_title"),
+            description=self.text,
         )
 
     @staticmethod
     def get_list_embed(
-        translator: Translator,
-        locale: discord.Locale,
-        *,
-        reminders: list[Reminder],
-        timezone: int,
-        start: int,
+        translator: Translator, locale: discord.Locale, *, reminders: list[Reminder], start: int
     ) -> DefaultEmbed:
         return DefaultEmbed(
             translator=translator,
             locale=locale,
             title=LocaleStr("reminder_list_embed_title"),
             description="\n".join(
-                f"{i}. {shorten_text(reminder.text, 100)}: {discord.utils.format_dt(astimezone(reminder.datetime, timezone), 'R')}"
+                f"{i}. {shorten_text(reminder.text, 100)}: {discord.utils.format_dt(reminder.datetime, 'R')}"
                 for i, reminder in enumerate(reminders, start=start)
             ),
         )
@@ -330,3 +325,8 @@ class Notes(BaseModel):
 async def get_locale(i: Interaction) -> discord.Locale:
     user, _ = await LuminaUser.get_or_create(id=i.user.id)
     return user.locale or i.locale
+
+
+async def get_timezone(user_id: int) -> int:
+    user, _ = await LuminaUser.get_or_create(id=user_id)
+    return user.timezone
