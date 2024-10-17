@@ -42,16 +42,13 @@ class ScheduleCog(commands.Cog):
                 if (
                     (birthday.month, birthday.day) == (2, 29)
                     and not is_leap_year
-                    and (birthday.leap_year_notify_month, birthday.leap_year_notify_day)
-                    != (now.month, now.day)
+                    and (birthday.leap_year_notify_month, birthday.leap_year_notify_day) != (now.month, now.day)
                 ):
                     continue
 
                 logger.info(f"Sending birthday reminder to {birthday.bday_user_id}")
                 await birthday.fetch_related("user")
-                embed = birthday.get_embed(
-                    self.bot.translator, birthday.user.locale or DEFAULT_LOCALE
-                )
+                embed = birthday.get_embed(self.bot.translator, birthday.user.locale or DEFAULT_LOCALE)
                 success = await self.bot.dm_user(birthday.user_id, embed=embed)
                 if success:
                     birthday.last_notify_year = now.year

@@ -109,8 +109,7 @@ class Modal(discord.ui.Modal):
     @property
     def incomplete(self) -> bool:
         return any(
-            isinstance(child, discord.ui.TextInput) and child.required and not child.value
-            for child in self.children
+            isinstance(child, discord.ui.TextInput) and child.required and not child.value for child in self.children
         )
 
     def translate(self, translator: Translator, locale: discord.Locale) -> None:
@@ -159,11 +158,7 @@ class TextInput(discord.ui.TextInput):
 
         if isinstance(self.locale_placeholder, LocaleStr):
             self.placeholder = translator.translate(self.locale_placeholder, locale=locale)
-        elif (
-            self.locale_placeholder is None
-            and self.min_value is not None
-            and self.max_value is not None
-        ):
+        elif self.locale_placeholder is None and self.min_value is not None and self.max_value is not None:
             self.placeholder = f"{self.min_value}~{self.max_value}"
 
         if isinstance(self.locale_default, LocaleStr):
@@ -187,20 +182,14 @@ class TextInput(discord.ui.TextInput):
 
 
 class Paginator(View):
-    def __init__(
-        self, embeds: Sequence[LuminaEmbed], *, translator: Translator, locale: discord.Locale
-    ) -> None:
+    def __init__(self, embeds: Sequence[LuminaEmbed], *, translator: Translator, locale: discord.Locale) -> None:
         super().__init__(translator, locale)
         self._embeds = embeds
         self._page = 0
 
     def _set_footers(self) -> None:
         for i, embed in enumerate(self._embeds):
-            embed.set_footer(
-                text=LocaleStr(
-                    "paginator_footer", params={"page": i + 1, "total": len(self._embeds)}
-                )
-            )
+            embed.set_footer(text=LocaleStr("paginator_footer", params={"page": i + 1, "total": len(self._embeds)}))
 
     def _toggle_buttons(self) -> None:
         self.previous_page.disabled = self._page == 0

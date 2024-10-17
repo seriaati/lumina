@@ -20,9 +20,7 @@ class CommandTree(discord.app_commands.CommandTree):
         if isinstance(error, discord.app_commands.CheckFailure):
             return
 
-        embed, recognized = create_error_embed(
-            error, translator=i.client.translator, locale=i.locale
-        )
+        embed, recognized = create_error_embed(error, translator=i.client.translator, locale=i.locale)
         if not recognized:
             logger.exception("An unrecognized error occurred.")
 

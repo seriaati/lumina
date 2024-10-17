@@ -50,9 +50,7 @@ class DefaultEmbed(LuminaEmbed):
         self.translator = translator
         self.locale = locale
 
-        super().__init__(
-            translator, locale, title=title, description=description, url=url, color=16757760
-        )
+        super().__init__(translator, locale, title=title, description=description, url=url, color=16757760)
 
 
 class ErrorEmbed(LuminaEmbed):
@@ -68,6 +66,4 @@ class ErrorEmbed(LuminaEmbed):
         self.translator = translator
         self.locale = locale
 
-        super().__init__(
-            translator, locale, title=title, description=description, url=url, color=15169131
-        )
+        super().__init__(translator, locale, title=title, description=description, url=url, color=15169131)

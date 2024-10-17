@@ -18,9 +18,7 @@ if TYPE_CHECKING:
 
 
 class NotesModal(Modal):
-    note_title = TextInput(
-        label=LocaleStr("notes_modal_title_label"), default=LocaleStr("notes_modal_untitled")
-    )
+    note_title = TextInput(label=LocaleStr("notes_modal_title_label"), default=LocaleStr("notes_modal_untitled"))
     note_content = TextInput(label=LocaleStr("notes_modal_content_label"), style=TextStyle.long)
 
 
@@ -37,9 +35,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         self.bot.tree.add_command(self.save_to_notes_ctx_menu)
 
     async def cog_unload(self) -> None:
-        self.bot.tree.remove_command(
-            self.save_to_notes_ctx_menu.name, type=self.save_to_notes_ctx_menu.type
-        )
+        self.bot.tree.remove_command(self.save_to_notes_ctx_menu.name, type=self.save_to_notes_ctx_menu.type)
 
     async def save_to_notes_ctx(self, i: Interaction, message: Message) -> Any:
         return await self.save_to_notes(i, message=message)
@@ -64,24 +60,18 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
             content=modal.note_content.value,
             user=user,
         )
-        await i.followup.send(
-            embed=notes.get_created_embed(i.client.translator, locale), ephemeral=True
-        )
+        await i.followup.send(embed=notes.get_created_embed(i.client.translator, locale), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("write", key="notes_write_command_name"),
-        description=app_commands.locale_str(
-            "Write a new note", key="notes_write_command_description"
-        ),
+        description=app_commands.locale_str("Write a new note", key="notes_write_command_description"),
     )
     async def notes_write(self, i: Interaction) -> None:
         return await self.save_to_notes(i)
 
     @app_commands.command(
         name=app_commands.locale_str("remove", key="birthday_remove_command_name"),
-        description=app_commands.locale_str(
-            "Remove a note", key="notes_remove_command_description"
-        ),
+        description=app_commands.locale_str("Remove a note", key="notes_remove_command_description"),
     )
     @app_commands.rename(note_id=app_commands.locale_str("note", key="note_parameter_name"))
     async def notes_remove(self, i: Interaction, note_id: int) -> None:
@@ -92,9 +82,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
             raise NoteNotFoundError
 
         await notes.delete()
-        await i.followup.send(
-            embed=notes.get_removed_embed(i.client.translator, await get_locale(i)), ephemeral=True
-        )
+        await i.followup.send(embed=notes.get_removed_embed(i.client.translator, await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
@@ -113,11 +101,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         embeds: list[DefaultEmbed] = []
 
         for index, notes_ in enumerate(chunked_notes):
-            embeds.append(
-                Notes.get_list_embed(
-                    i.client.translator, locale, notes=notes_, start=1 + index * 10
-                )
-            )
+            embeds.append(Notes.get_list_embed(i.client.translator, locale, notes=notes_, start=1 + index * 10))
 
         view = Paginator(embeds, translator=i.client.translator, locale=locale)
         await view.start(i)
@@ -138,18 +122,14 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
 
     @notes_remove.autocomplete("note_id")
     @notes_read.autocomplete("note_id")
-    async def note_id_autocomplete(
-        self, i: Interaction, current: str
-    ) -> list[app_commands.Choice[int]]:
+    async def note_id_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[int]]:
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         notes = await Notes.filter(user=user).all()
 
         if not notes:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(
-                        LocaleStr("no_notes_title"), locale=await get_locale(i)
-                    ),
+                    name=i.client.translator.translate(LocaleStr("no_notes_title"), locale=await get_locale(i)),
                     value=-1,
                 )
             ]

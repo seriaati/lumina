@@ -45,18 +45,14 @@ class LuminaUser(BaseModel):
 
     @staticmethod
     def get_settings_saved_embed(translator: Translator, locale: discord.Locale) -> DefaultEmbed:
-        return DefaultEmbed(
-            translator=translator, locale=locale, title=LocaleStr("settings_saved_embed_title")
-        )
+        return DefaultEmbed(translator=translator, locale=locale, title=LocaleStr("settings_saved_embed_title"))
 
 
 class Birthday(BaseModel):
     id = fields.BigIntField(pk=True, generated=True)
 
     bday_user_id = fields.BigIntField()
-    user: fields.ForeignKeyRelation[LuminaUser] = fields.ForeignKeyField(
-        "models.LuminaUser", related_name="birthdays"
-    )
+    user: fields.ForeignKeyRelation[LuminaUser] = fields.ForeignKeyField("models.LuminaUser", related_name="birthdays")
     user_id: fields.BigIntField
 
     month = fields.IntField()
@@ -85,13 +81,7 @@ class Birthday(BaseModel):
 
     @staticmethod
     def get_created_embed(
-        translator: Translator,
-        locale: discord.Locale,
-        *,
-        user: UserOrMember,
-        month: int,
-        day: int,
-        timezone: int,
+        translator: Translator, locale: discord.Locale, *, user: UserOrMember, month: int, day: int, timezone: int
     ) -> DefaultEmbed:
         dt = Birthday.get_correct_dt(month=month, day=day, timezone=timezone)
 
@@ -106,26 +96,17 @@ class Birthday(BaseModel):
         ).set_thumbnail(url=user.display_avatar.url)
 
     @staticmethod
-    def get_removed_embed(
-        translator: Translator, locale: discord.Locale, *, user: UserOrMember
-    ) -> DefaultEmbed:
+    def get_removed_embed(translator: Translator, locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
         return DefaultEmbed(
             translator=translator,
             locale=locale,
             title=LocaleStr("birthday_removed_embed_title"),
-            description=LocaleStr(
-                "birthday_removed_embed_description", params={"user_id": user.id}
-            ),
+            description=LocaleStr("birthday_removed_embed_description", params={"user_id": user.id}),
         )
 
     @staticmethod
     def get_list_embed(
-        translator: Translator,
-        locale: discord.Locale,
-        *,
-        birthdays: list[Birthday],
-        timezone: int,
-        start: int,
+        translator: Translator, locale: discord.Locale, *, birthdays: list[Birthday], timezone: int, start: int
     ) -> DefaultEmbed:
         return DefaultEmbed(
             translator=translator,
@@ -151,9 +132,7 @@ class Birthday(BaseModel):
             translator=translator,
             locale=locale,
             title=LocaleStr("birthday_embed_title"),
-            description=LocaleStr(
-                "birthday_embed_description", params={"user_id": self.bday_user_id}
-            ),
+            description=LocaleStr("birthday_embed_description", params={"user_id": self.bday_user_id}),
         )
 
     class Meta:
@@ -172,10 +151,7 @@ class Reminder(BaseModel):
 
     def get_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         if self.message_url is not None:
-            params = {
-                "message_url": self.message_url,
-                "created_at": discord.utils.format_dt(self.created_at, "R"),
-            }
+            params = {"message_url": self.message_url, "created_at": discord.utils.format_dt(self.created_at, "R")}
             locale_str_key = "message_reminder_embed_description"
         else:
             params = {"created_at": discord.utils.format_dt(self.created_at, "R")}
@@ -194,17 +170,13 @@ class Reminder(BaseModel):
             locale=locale,
             title=LocaleStr("reminder_created_embed_title"),
             description=LocaleStr(
-                "reminder_created_embed_description",
-                params={"dt": discord.utils.format_dt(self.datetime, "R")},
+                "reminder_created_embed_description", params={"dt": discord.utils.format_dt(self.datetime, "R")}
             ),
         )
 
     def get_removed_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
-            translator=translator,
-            locale=locale,
-            title=LocaleStr("reminder_removed_embed_title"),
-            description=self.text,
+            translator=translator, locale=locale, title=LocaleStr("reminder_removed_embed_title"), description=self.text
         )
 
     @staticmethod
@@ -276,8 +248,7 @@ class TodoTask(BaseModel):
             locale=locale,
             title=LocaleStr("todo_list_embed_title"),
             description="\n".join(
-                f"{i}. {TodoTask.format_todo_text(todo)}"
-                for i, todo in enumerate(todos, start=start)
+                f"{i}. {TodoTask.format_todo_text(todo)}" for i, todo in enumerate(todos, start=start)
             ),
         )
 
@@ -316,9 +287,7 @@ class Notes(BaseModel):
             translator=translator,
             locale=locale,
             title=LocaleStr("notes_list_embed_title"),
-            description="\n".join(
-                f"{i}. {shorten_text(note.title, 100)}" for i, note in enumerate(notes, start=start)
-            ),
+            description="\n".join(f"{i}. {shorten_text(note.title, 100)}" for i, note in enumerate(notes, start=start)),
         )
 
 

@@ -22,12 +22,8 @@ if TYPE_CHECKING:
 
 
 class BirthdayModal(Modal):
-    month = TextInput(
-        label=LocaleStr("birthday_modal_month_label"), is_integer=True, min_value=1, max_value=12
-    )
-    day = TextInput(
-        label=LocaleStr("birthday_modal_day_label"), is_integer=True, min_value=1, max_value=31
-    )
+    month = TextInput(label=LocaleStr("birthday_modal_month_label"), is_integer=True, min_value=1, max_value=12)
+    day = TextInput(label=LocaleStr("birthday_modal_day_label"), is_integer=True, min_value=1, max_value=31)
 
 
 class LeapYearNotifyView(View):
@@ -51,17 +47,13 @@ class NotifyButton(Button[LeapYearNotifyView]):
     async def callback(self, i: Interaction) -> None:
         self.view.birthday.leap_year_notify_month = self.month
         self.view.birthday.leap_year_notify_day = self.day
-        await self.view.birthday.save(
-            update_fields=("leap_year_notify_month", "leap_year_notify_day")
-        )
+        await self.view.birthday.save(update_fields=("leap_year_notify_month", "leap_year_notify_day"))
 
         embed = LuminaUser.get_settings_saved_embed(self.view.translator, self.view.locale)
         await i.response.send_message(embed=embed, ephemeral=True)
 
 
-class BirthdayCog(
-    commands.GroupCog, name=app_commands.locale_str("birthday", key="birthday_group_name")
-):
+class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", key="birthday_group_name")):
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 
@@ -80,9 +72,7 @@ class BirthdayCog(
 
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(self.set_bday_ctx_menu.name, type=self.set_bday_ctx_menu.type)
-        self.bot.tree.remove_command(
-            self.remove_bday_ctx_menu.name, type=self.remove_bday_ctx_menu.type
-        )
+        self.bot.tree.remove_command(self.remove_bday_ctx_menu.name, type=self.remove_bday_ctx_menu.type)
 
     async def set_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
         modal = BirthdayModal(title=LocaleStr("birthday_modal_title"))
@@ -107,9 +97,7 @@ class BirthdayCog(
         locale = await get_locale(i)
 
         try:
-            birthday = await Birthday.create(
-                bday_user_id=user.id, user=lumina_user, month=month, day=day
-            )
+            birthday = await Birthday.create(bday_user_id=user.id, user=lumina_user, month=month, day=day)
         except tortoise.exceptions.IntegrityError:
             birthday = await Birthday.get(bday_user_id=user.id, user=lumina_user)
             birthday.month = month
@@ -118,12 +106,7 @@ class BirthdayCog(
 
         embeds = [
             Birthday.get_created_embed(
-                i.client.translator,
-                locale,
-                user=user,
-                month=month,
-                day=day,
-                timezone=lumina_user.timezone,
+                i.client.translator, locale, user=user, month=month, day=day, timezone=lumina_user.timezone
             )
         ]
         if (month, day) == (2, 29):
@@ -142,15 +125,12 @@ class BirthdayCog(
 
         await bday.delete()
         await i.response.send_message(
-            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user),
-            ephemeral=True,
+            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user), ephemeral=True
         )
 
     @app_commands.command(
         name=app_commands.locale_str("set", key="birthday_set_command_name"),
-        description=app_commands.locale_str(
-            "Set someone's birthday", key="birthday_set_command_description"
-        ),
+        description=app_commands.locale_str("Set someone's birthday", key="birthday_set_command_description"),
     )
     @app_commands.rename(
         user=app_commands.locale_str("user", key="user_parameter_name"),
@@ -168,9 +148,7 @@ class BirthdayCog(
         await self.set_birthday(i, user, month, day)
 
     @birthday_set.autocomplete("month")
-    async def month_autocomplete(
-        self, _: Interaction, current: str
-    ) -> list[app_commands.Choice[int]]:
+    async def month_autocomplete(self, _: Interaction, current: str) -> list[app_commands.Choice[int]]:
         return [
             app_commands.Choice(name=str(month), value=month)
             for month in range(1, 13)
@@ -178,16 +156,12 @@ class BirthdayCog(
         ][:25]
 
     @birthday_set.autocomplete("day")
-    async def day_autocomplete(
-        self, i: Interaction, current: str
-    ) -> list[app_commands.Choice[int]]:
+    async def day_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[int]]:
         month = i.namespace.month
         if month is None:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(
-                        LocaleStr("select_month_first"), locale=await get_locale(i)
-                    ),
+                    name=i.client.translator.translate(LocaleStr("select_month_first"), locale=await get_locale(i)),
                     value=-1,
                 )
             ]
@@ -204,9 +178,7 @@ class BirthdayCog(
 
     @app_commands.command(
         name=app_commands.locale_str("remove", key="birthday_remove_command_name"),
-        description=app_commands.locale_str(
-            "Remove someone's birthday", key="birthday_remove_command_description"
-        ),
+        description=app_commands.locale_str("Remove someone's birthday", key="birthday_remove_command_description"),
     )
     @app_commands.rename(user=app_commands.locale_str("user", key="user_parameter_name"))
     async def birthday_remove(self, i: Interaction, user: UserOrMember) -> None:
@@ -219,15 +191,12 @@ class BirthdayCog(
 
         await bday.delete()
         await i.followup.send(
-            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user),
-            ephemeral=True,
+            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user), ephemeral=True
         )
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
-        description=app_commands.locale_str(
-            "List all birthdays you have set", key="birthday_list_command_description"
-        ),
+        description=app_commands.locale_str("List all birthdays you have set", key="birthday_list_command_description"),
     )
     async def birthday_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
@@ -245,11 +214,7 @@ class BirthdayCog(
         for index, bdays in enumerate(split_birthdays):
             embeds.append(
                 Birthday.get_list_embed(
-                    i.client.translator,
-                    locale,
-                    birthdays=bdays,
-                    timezone=timezone,
-                    start=1 + index * 10,
+                    i.client.translator, locale, birthdays=bdays, timezone=timezone, start=1 + index * 10
                 )
             )
 

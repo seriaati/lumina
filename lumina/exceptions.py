@@ -12,8 +12,7 @@ class LuminaError(Exception):
 class InvalidInputError(LuminaError):
     def __init__(self, value: str) -> None:
         super().__init__(
-            LocaleStr("invalid_input_title"),
-            LocaleStr("invalid_input_description", params={"value": value}),
+            LocaleStr("invalid_input_title"), LocaleStr("invalid_input_description", params={"value": value})
         )
 
 

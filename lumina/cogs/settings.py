@@ -38,9 +38,7 @@ class SettingsCog(commands.Cog):
         await i.followup.send(embed=embed, ephemeral=True)
 
     @set_lang_command.autocomplete("lang")
-    async def lang_autocomplete(
-        self, i: Interaction, current: str
-    ) -> list[app_commands.Choice[str]]:
+    async def lang_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[str]]:
         return [
             app_commands.Choice(name=translations["lang_name"], value=key)
             for key, translations in i.client.translator.translations.items()
@@ -49,17 +47,11 @@ class SettingsCog(commands.Cog):
 
     @app_commands.command(
         name=app_commands.locale_str("timezone", key="timezone_param_name"),
-        description=app_commands.locale_str(
-            "Set your timezone", key="timezone_command_description"
-        ),
+        description=app_commands.locale_str("Set your timezone", key="timezone_command_description"),
     )
     @app_commands.rename(timezone=app_commands.locale_str("timezone", key="timezone_param_name"))
-    @app_commands.describe(
-        timezone=app_commands.locale_str("timezone", key="timezone_param_description")
-    )
-    async def set_timezone_command(
-        self, i: Interaction, timezone: app_commands.Range[int, -12, 14]
-    ) -> None:
+    @app_commands.describe(timezone=app_commands.locale_str("timezone", key="timezone_param_description"))
+    async def set_timezone_command(self, i: Interaction, timezone: app_commands.Range[int, -12, 14]) -> None:
         await i.response.defer(ephemeral=True)
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
