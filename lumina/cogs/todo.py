@@ -9,7 +9,7 @@ from discord.ext import commands
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoTasksError, TodoNotFoundError
 from lumina.l10n import LocaleStr
-from lumina.models import TodoTask, get_locale
+from lumina.models import LuminaUser, TodoTask, get_locale
 from lumina.utils import shorten_text, split_list_to_chunks
 
 if TYPE_CHECKING:
@@ -47,10 +47,11 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         await i.response.defer(ephemeral=True)
 
         locale = await get_locale(i)
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
         todo = await TodoTask.create(
             text=message.content
             or i.client.translator.translate(LocaleStr("no_content"), locale=locale),
-            user_id=i.user.id,
+            user=user,
         )
         await i.followup.send(
             embed=todo.get_created_embed(i.client.translator, locale), ephemeral=True
@@ -65,7 +66,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     async def todo_add_command(self, i: Interaction, text: str) -> None:
         await i.response.defer(ephemeral=True)
 
-        todo = await TodoTask.create(text=text, user_id=i.user.id)
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        todo = await TodoTask.create(text=text, user=user)
         await i.followup.send(
             embed=todo.get_created_embed(i.client.translator, await get_locale(i)), ephemeral=True
         )
@@ -78,7 +80,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     )
     @app_commands.rename(task_id=app_commands.locale_str("task", key="task_parameter_name"))
     async def todo_done(self, i: Interaction, task_id: int) -> None:
-        todo = await TodoTask.get_or_none(id=task_id, user_id=i.user.id)
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        todo = await TodoTask.get_or_none(id=task_id, user=user)
         if todo is None:
             raise TodoNotFoundError
 
@@ -95,7 +98,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     )
     @app_commands.rename(task_id=app_commands.locale_str("task", key="task_parameter_name"))
     async def todo_remove(self, i: Interaction, task_id: int) -> None:
-        todo = await TodoTask.get_or_none(id=task_id, user_id=i.user.id)
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        todo = await TodoTask.get_or_none(id=task_id, user=user)
         if todo is None:
             raise TodoNotFoundError
 
@@ -108,7 +112,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     async def task_done_task_id_autocomplete(
         self, i: Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        tasks = await TodoTask.filter(user_id=i.user.id, done=False).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        tasks = await TodoTask.filter(user=user, done=False).all()
 
         if not tasks:
             return [
@@ -130,7 +135,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     async def task_id_autocomplete(
         self, i: Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        tasks = await TodoTask.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        tasks = await TodoTask.filter(user=user).all()
 
         if not tasks:
             return [
@@ -170,13 +176,13 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
     )
     async def todo_list(self, i: Interaction, show_done_tasks: int = 0) -> None:
         await i.response.defer(ephemeral=True)
-
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
         show_done_tasks = bool(show_done_tasks)
 
         if not show_done_tasks:
-            tasks = await TodoTask.filter(user_id=i.user.id, done=False).all()
+            tasks = await TodoTask.filter(user=user, done=False).all()
         else:
-            tasks = await TodoTask.filter(user_id=i.user.id).all()
+            tasks = await TodoTask.filter(user=user).all()
 
         if not tasks:
             raise NoTasksError

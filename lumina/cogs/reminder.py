@@ -11,7 +11,7 @@ from discord.ext import commands
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoRemindersError, ReminderNotFoundError
 from lumina.l10n import LocaleStr
-from lumina.models import Reminder, get_locale, get_timezone
+from lumina.models import LuminaUser, Reminder, get_locale, get_timezone
 from lumina.utils import get_now, shorten_text, split_list_to_chunks
 
 if TYPE_CHECKING:
@@ -68,11 +68,12 @@ class ReminderCog(
         timezone = await get_timezone(i.user.id)
         dt = self.natural_language_to_dt(modal.time.value, timezone)
 
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
         reminder = await Reminder.create(
             text=message.content
             or i.client.translator.translate(LocaleStr("no_content"), locale=locale),
             datetime=dt,
-            user_id=i.user.id,
+            user=user,
             message_url=message.jump_url,
         )
         await self.bot.scheduler.schedule_reminder()
@@ -100,7 +101,8 @@ class ReminderCog(
         timezone = await get_timezone(i.user.id)
         dt = self.natural_language_to_dt(when, timezone)
 
-        reminder = await Reminder.create(text=text, datetime=dt, user_id=i.user.id)
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        reminder = await Reminder.create(text=text, datetime=dt, user=user)
         await self.bot.scheduler.schedule_reminder()
 
         await i.followup.send(
@@ -134,7 +136,8 @@ class ReminderCog(
     async def reminder_id_autocomplete(
         self, i: Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        reminders = await Reminder.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        reminders = await Reminder.filter(user=user).all()
 
         if not reminders:
             return [
@@ -161,7 +164,8 @@ class ReminderCog(
     async def reminder_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
 
-        reminders = await Reminder.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        reminders = await Reminder.filter(user=user).all()
         if not reminders:
             raise NoRemindersError
 

@@ -108,10 +108,10 @@ class BirthdayCog(
 
         try:
             birthday = await Birthday.create(
-                bday_user_id=user.id, user_id=i.user.id, month=month, day=day
+                bday_user_id=user.id, user=lumina_user, month=month, day=day
             )
         except tortoise.exceptions.IntegrityError:
-            birthday = await Birthday.get(bday_user_id=user.id, user_id=i.user.id)
+            birthday = await Birthday.get(bday_user_id=user.id, user=lumina_user)
             birthday.month = month
             birthday.day = day
             await birthday.save(update_fields=("month", "day"))
@@ -135,7 +135,8 @@ class BirthdayCog(
         await absolute_send(i, embeds=embeds, ephemeral=True, view=view)
 
     async def remove_birthday(self, i: Interaction, user: UserOrMember) -> Any:
-        bday = await Birthday.get_or_none(bday_user_id=user.id, user_id=i.user.id)
+        lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        bday = await Birthday.get_or_none(bday_user_id=user.id, user=lumina_user)
         if bday is None:
             raise DidNotSetBirthdayError(user_id=user.id)
 
@@ -211,7 +212,8 @@ class BirthdayCog(
     async def birthday_remove(self, i: Interaction, user: UserOrMember) -> None:
         await i.response.defer(ephemeral=True)
 
-        bday = await Birthday.get_or_none(bday_user_id=user.id, user_id=i.user.id)
+        lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        bday = await Birthday.get_or_none(bday_user_id=user.id, user=lumina_user)
         if bday is None:
             raise DidNotSetBirthdayError(user_id=user.id)
 
@@ -230,7 +232,8 @@ class BirthdayCog(
     async def birthday_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
 
-        birthdays = await Birthday.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        birthdays = await Birthday.filter(user=user).all()
         if not birthdays:
             raise NoBirthdaysError
 

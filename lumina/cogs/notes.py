@@ -8,7 +8,7 @@ from discord.ext import commands
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoNotesError, NoteNotFoundError
 from lumina.l10n import LocaleStr
-from lumina.models import Notes, get_locale
+from lumina.models import LuminaUser, Notes, get_locale
 from lumina.utils import shorten_text, split_list_to_chunks
 
 if TYPE_CHECKING:
@@ -57,11 +57,12 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         if modal.incomplete:
             return
 
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
         notes = await Notes.create(
             title=modal.note_title.value
             or i.client.translator.translate(LocaleStr("notes_modal_untitled"), locale=locale),
             content=modal.note_content.value,
-            user_id=i.user.id,
+            user=user,
         )
         await i.followup.send(
             embed=notes.get_created_embed(i.client.translator, locale), ephemeral=True
@@ -102,7 +103,8 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
     async def notes_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
 
-        notes = await Notes.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        notes = await Notes.filter(user=user).all()
         if not notes:
             raise NoNotesError
 
@@ -139,7 +141,8 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
     async def note_id_autocomplete(
         self, i: Interaction, current: str
     ) -> list[app_commands.Choice[int]]:
-        notes = await Notes.filter(user_id=i.user.id).all()
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        notes = await Notes.filter(user=user).all()
 
         if not notes:
             return [
