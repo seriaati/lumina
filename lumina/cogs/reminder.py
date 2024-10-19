@@ -9,7 +9,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from lumina.components import Modal, Paginator, TextInput
-from lumina.exceptions import NoRemindersError, ReminderNotFoundError
+from lumina.exceptions import NoRemindersError, NotFutureTimeError, ReminderNotFoundError
 from lumina.l10n import LocaleStr
 from lumina.models import LuminaUser, Reminder, get_locale, get_timezone
 from lumina.utils import get_now, shorten_text, split_list_to_chunks
@@ -38,7 +38,10 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
         cal = parsedatetime.Calendar()
         time_struct, _ = cal.parse(time, get_now(timezone))
-        return datetime.datetime(*time_struct[:6]).replace(tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+        dt = datetime.datetime(*time_struct[:6]).replace(tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+        if dt < get_now(timezone):
+            raise NotFutureTimeError
+        return dt
 
     async def cog_load(self) -> None:
         self.bot.tree.add_command(self.set_reminder_ctx_menu)

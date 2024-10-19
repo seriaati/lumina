@@ -57,3 +57,8 @@ class NoNotesError(LuminaError):
 class NoteNotFoundError(LuminaError):
     def __init__(self) -> None:
         super().__init__(LocaleStr("note_not_found_title"))
+
+
+class NotFutureTimeError(LuminaError):
+    def __init__(self) -> None:
+        super().__init__(LocaleStr("not_future_time_error"))

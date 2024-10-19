@@ -105,3 +105,4 @@ leap_year_notify_embed_description: On a non-leap year, February 29th doesn't ex
 notify_on_mar_1: Notify me on March 1st
 notify_on_feb_28: Notify me on February 28th
 dont_notify: Don't notify me
+not_future_time_error: The reminder time must be in the future
