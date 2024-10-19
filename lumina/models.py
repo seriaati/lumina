@@ -148,6 +148,7 @@ class Reminder(BaseModel):
     user_id: fields.BigIntField
     created_at = fields.DatetimeField(auto_now_add=True)
     message_url: fields.Field[str | None] = fields.TextField(null=True)
+    sent = fields.BooleanField(default=False)
 
     def get_embed(self, translator: Translator, locale: discord.Locale) -> DefaultEmbed:
         if self.message_url is not None:

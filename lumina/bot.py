@@ -28,12 +28,12 @@ class ReminderScheduler:
     async def send_reminder(self, reminder: Reminder) -> None:
         logger.info(f"Sending reminder to {reminder.user_id}")
         embed = reminder.get_embed(self.bot.translator, reminder.user.locale or DEFAULT_LOCALE)
-        success = await self.bot.dm_user(reminder.user_id, embed=embed)
-        if success:
-            await reminder.delete()
+        await self.bot.dm_user(reminder.user_id, embed=embed)
+        reminder.sent = True
+        await reminder.save()
 
     async def get_next_reminder(self) -> Reminder | None:
-        return await Reminder.all().order_by("datetime").first().prefetch_related("user")
+        return await Reminder.filter(sent=False).order_by("datetime").first().prefetch_related("user")
 
     async def sleep_task(self, reminder: Reminder) -> None:
         await sleep_until(reminder.datetime)
