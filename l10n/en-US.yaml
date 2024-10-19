@@ -1,6 +1,6 @@
 unknown_error: An unknown error occurred
 birthday_embed_title: Today is someone's birthday!
-birthday_embed_description: Say happy birthday to <@{user_id}> 🎂🎂
+birthday_embed_description: Say happy birthday to <@{user_id}>
 message_reminder_embed_description: "[Go to message]({message_url})\nCreated at {created_at}"
 reminder_embed_description: "Created at {created_at}"
 birthday_modal_title: Set Birthday Date
