@@ -38,11 +38,14 @@ class ReminderScheduler:
     async def sleep_task(self, reminder: Reminder) -> None:
         await sleep_until(reminder.datetime)
         await self.send_reminder(reminder)
+        self.current_task = None
+        await self.schedule_reminder()
 
     async def schedule_reminder(self) -> None:
         self.cancel_task()
 
         reminder = await self.get_next_reminder()
+        logger.debug(f"Next reminder: {reminder}")
         if reminder is None:
             return
 
