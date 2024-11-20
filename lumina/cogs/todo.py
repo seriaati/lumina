@@ -55,7 +55,7 @@ class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_
         description=app_commands.locale_str("Set a reminder", key="todo_add_command_description"),
     )
     @app_commands.rename(text=app_commands.locale_str("text", key="text_parameter_name"))
-    @app_commands.describe(text=app_commands.locale_str("text", key="text_param_description_todo"))
+    @app_commands.describe(text=app_commands.locale_str("The task to add", key="todo_add_text_param_desc"))
     async def todo_add_command(self, i: Interaction, text: str) -> None:
         await i.response.defer(ephemeral=True)
 
@@ -68,6 +68,7 @@ class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_
         description=app_commands.locale_str("Mark a task as done", key="todo_done_command_description"),
     )
     @app_commands.rename(task_id=app_commands.locale_str("task", key="task_parameter_name"))
+    @app_commands.describe(task_id=app_commands.locale_str("The task to mark as done", key="task_param_desc"))
     async def todo_done(self, i: Interaction, task_id: int) -> None:
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         todo = await TodoTask.get_or_none(id=task_id, user=user)
@@ -84,6 +85,7 @@ class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_
         ),
     )
     @app_commands.rename(task_id=app_commands.locale_str("task", key="task_parameter_name"))
+    @app_commands.describe(task_id=app_commands.locale_str("The task to remove", key="task_remove_param_desc"))
     async def todo_remove(self, i: Interaction, task_id: int) -> None:
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         todo = await TodoTask.get_or_none(id=task_id, user=user)

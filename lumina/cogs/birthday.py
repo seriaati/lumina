@@ -131,6 +131,11 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         month=app_commands.locale_str("month", key="month_parameter_name"),
         day=app_commands.locale_str("day", key="day_parameter_name"),
     )
+    @app_commands.describe(
+        user=app_commands.locale_str("The user whose birthday you want to set", key="bday_set_user_param_desc"),
+        month=app_commands.locale_str("The month of the birthday", key="bday_set_month_param_desc"),
+        day=app_commands.locale_str("The day of the birthday", key="bday_set_day_param_desc"),
+    )
     async def birthday_set(
         self,
         i: Interaction,
@@ -174,6 +179,9 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         description=app_commands.locale_str("Remove someone's birthday", key="birthday_remove_command_description"),
     )
     @app_commands.rename(user=app_commands.locale_str("user", key="user_parameter_name"))
+    @app_commands.describe(
+        user=app_commands.locale_str("The user whose birthday you want to remove", key="bday_remove_user_param_desc")
+    )
     async def birthday_remove(self, i: Interaction, user: UserOrMember) -> None:
         await i.response.defer(ephemeral=True)
 

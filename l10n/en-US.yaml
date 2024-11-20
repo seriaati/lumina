@@ -106,3 +106,17 @@ notify_on_mar_1: Notify me on March 1st
 notify_on_feb_28: Notify me on February 28th
 dont_notify: Don't notify me
 not_future_time_error: The reminder time must be in the future
+bday_remove_user_param_desc: The user whose birthday you want to remove
+bday_set_user_param_desc: The user whose birthday you want to set
+bday_set_month_param_desc: The month of the birthday
+bday_set_day_param_desc: The day of the birthday
+note_remove_param_desc: The note to remove
+note_read_param_desc: The note to read
+reminder_set_when_param_desc: When to remind you (e.g. in 1 hour, December 21st)
+reminder_set_text_param_desc: What to remind you of
+reminder_remove_param_desc: The reminder to remove
+lang_param_desc: The language to set
+timezone_param_desc: The UTC timezone to set (e.g. +4, -3)
+todo_add_text_param_desc: The task to add
+task_param_desc: The task to mark as done
+task_remove_param_desc: The task to remove

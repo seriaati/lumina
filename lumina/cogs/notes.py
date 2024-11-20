@@ -73,6 +73,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         description=app_commands.locale_str("Remove a note", key="notes_remove_command_description"),
     )
     @app_commands.rename(note_id=app_commands.locale_str("note", key="note_parameter_name"))
+    @app_commands.describe(note_id=app_commands.locale_str("The note to remove", key="note_remove_param_desc"))
     async def notes_remove(self, i: Interaction, note_id: int) -> None:
         await i.response.defer(ephemeral=True)
 
@@ -110,6 +111,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         description=app_commands.locale_str("Read a note", key="notes_read_command_description"),
     )
     @app_commands.rename(note_id=app_commands.locale_str("note", key="note_parameter_name"))
+    @app_commands.describe(note_id=app_commands.locale_str("The note to read", key="note_read_param_desc"))
     async def notes_read(self, i: Interaction, note_id: int) -> None:
         await i.response.defer(ephemeral=True)
 

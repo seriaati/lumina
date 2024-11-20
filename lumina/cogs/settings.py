@@ -25,6 +25,7 @@ class SettingsCog(commands.Cog):
         ),
     )
     @app_commands.rename(lang=app_commands.locale_str("language", key="lang_param_name"))
+    @app_commands.describe(lang=app_commands.locale_str("The language to set", key="lang_param_desc"))
     async def set_lang_command(self, i: Interaction, lang: str) -> None:
         if lang not in translator.translations:
             raise InvalidInputError(lang)
@@ -51,7 +52,9 @@ class SettingsCog(commands.Cog):
         description=app_commands.locale_str("Set your timezone", key="timezone_command_description"),
     )
     @app_commands.rename(timezone=app_commands.locale_str("timezone", key="timezone_param_name"))
-    @app_commands.describe(timezone=app_commands.locale_str("timezone", key="timezone_param_description"))
+    @app_commands.describe(
+        timezone=app_commands.locale_str("The UTC timezone to set (e.g. +4, -3)", key="timezone_param_desc")
+    )
     async def set_timezone_command(self, i: Interaction, timezone: app_commands.Range[int, -12, 14]) -> None:
         await i.response.defer(ephemeral=True)
 

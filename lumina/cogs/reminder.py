@@ -82,7 +82,12 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         when=app_commands.locale_str("when", key="when_parameter_name"),
         text=app_commands.locale_str("text", key="text_parameter_name"),
     )
-    @app_commands.describe(text=app_commands.locale_str("text", key="text_param_description_reminder"))
+    @app_commands.describe(
+        when=app_commands.locale_str(
+            "When to remind you (e.g. in 1 hour, December 21st)", key="reminder_set_when_param_desc"
+        ),
+        text=app_commands.locale_str("What to remind you of", key="reminder_set_text_param_desc"),
+    )
     async def reminder_set(self, i: Interaction, when: str, text: str) -> None:
         await i.response.defer(ephemeral=True)
 
@@ -100,6 +105,9 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         description=app_commands.locale_str("Remove a reminder", key="reminder_remove_command_description"),
     )
     @app_commands.rename(reminder_id=app_commands.locale_str("reminder", key="reminder_parameter_name"))
+    @app_commands.describe(
+        reminder_id=app_commands.locale_str("The reminder to remove", key="reminder_remove_param_desc")
+    )
     async def reminder_remove(self, i: Interaction, reminder_id: int) -> None:
         reminder = await Reminder.get_or_none(id=reminder_id)
         if reminder is None:
