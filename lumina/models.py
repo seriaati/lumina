@@ -173,7 +173,7 @@ class Reminder(BaseModel):
             locale=locale,
             title=LocaleStr("reminder_list_embed_title"),
             description="\n".join(
-                f"{i}. {shorten_text(reminder.text, 100)}: {discord.utils.format_dt(reminder.datetime, 'R')}"
+                f"{i}. {shorten_text(reminder.text, 100)}: {discord.utils.format_dt(reminder.datetime)}"
                 for i, reminder in enumerate(reminders, start=start)
             ),
         )
