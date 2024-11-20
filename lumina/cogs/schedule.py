@@ -48,7 +48,7 @@ class ScheduleCog(commands.Cog):
 
                 logger.info(f"Sending birthday reminder to {birthday.bday_user_id}")
                 await birthday.fetch_related("user")
-                embed = birthday.get_embed(self.bot.translator, birthday.user.locale or DEFAULT_LOCALE)
+                embed = birthday.get_embed(birthday.user.locale or DEFAULT_LOCALE)
                 success = await self.bot.dm_user(birthday.user_id, embed=embed)
                 if success:
                     birthday.last_notify_year = now.year

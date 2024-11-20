@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands
 
+from lumina.l10n import translator
+
 if TYPE_CHECKING:
     from lumina.bot import Lumina
 
@@ -23,7 +25,7 @@ class AdminCog(commands.Cog):
 
     @commands.command(name="reload-translator", aliases=["rt"])
     async def reload_translator_command(self, ctx: commands.Context) -> None:
-        await self.bot.translator.load()
+        await translator.load()
         await ctx.send("Reloaded translator.")
 
 

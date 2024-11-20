@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoRemindersError, NotFutureTimeError, ReminderNotFoundError
-from lumina.l10n import LocaleStr
+from lumina.l10n import LocaleStr, translator
 from lumina.models import LuminaUser, Reminder, get_locale, get_timezone
 from lumina.utils import get_now, shorten_text, split_list_to_chunks
 
@@ -53,7 +53,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         locale = await get_locale(i)
 
         modal = ReminderModal(title=LocaleStr("set_reminder_ctx_menu_name"))
-        modal.translate(i.client.translator, locale)
+        modal.translate(locale)
 
         await i.response.send_modal(modal)
         await modal.wait()
@@ -65,14 +65,14 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         reminder = await Reminder.create(
-            text=message.content or i.client.translator.translate(LocaleStr("no_content"), locale=locale),
+            text=message.content or translator.translate(LocaleStr("no_content"), locale=locale),
             datetime=dt,
             user=user,
             message_url=message.jump_url,
         )
         await self.bot.scheduler.schedule_reminder()
 
-        await i.followup.send(embed=reminder.get_created_embed(i.client.translator, locale), ephemeral=True)
+        await i.followup.send(embed=reminder.get_created_embed(locale), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("set", key="birthday_set_command_name"),
@@ -93,9 +93,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         reminder = await Reminder.create(text=text, datetime=dt, user=user)
         await self.bot.scheduler.schedule_reminder()
 
-        await i.followup.send(
-            embed=reminder.get_created_embed(i.client.translator, await get_locale(i)), ephemeral=True
-        )
+        await i.followup.send(embed=reminder.get_created_embed(await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("remove", key="birthday_remove_command_name"),
@@ -110,9 +108,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         await reminder.delete()
         await self.bot.scheduler.schedule_reminder()
 
-        await i.response.send_message(
-            embed=reminder.get_removed_embed(i.client.translator, await get_locale(i)), ephemeral=True
-        )
+        await i.response.send_message(embed=reminder.get_removed_embed(await get_locale(i)), ephemeral=True)
 
     @reminder_remove.autocomplete("reminder_id")
     async def reminder_id_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[int]]:
@@ -122,8 +118,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         if not reminders:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(LocaleStr("no_reminders_title"), locale=await get_locale(i)),
-                    value=-1,
+                    name=translator.translate(LocaleStr("no_reminders_title"), locale=await get_locale(i)), value=-1
                 )
             ]
 
@@ -150,9 +145,9 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         embeds: list[DefaultEmbed] = []
 
         for index, bdays in enumerate(split_reminders):
-            embeds.append(Reminder.get_list_embed(i.client.translator, locale, reminders=bdays, start=1 + index * 10))
+            embeds.append(Reminder.get_list_embed(locale, reminders=bdays, start=1 + index * 10))
 
-        view = Paginator(embeds, translator=i.client.translator, locale=locale)
+        view = Paginator(embeds, locale=locale)
         await view.start(i)
 
 

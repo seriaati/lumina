@@ -58,11 +58,10 @@ class Translator:
         return translation.format_map(string.params)
 
 
-class AppCommandTranslator(discord.app_commands.Translator):
-    def __init__(self, translator: Translator) -> None:
-        super().__init__()
-        self.translator = translator
+translator = Translator()
 
+
+class AppCommandTranslator(discord.app_commands.Translator):
     async def translate(
         self,
         string: discord.app_commands.locale_str,
@@ -71,4 +70,4 @@ class AppCommandTranslator(discord.app_commands.Translator):
     ) -> str:
         if (key := string.extras.get("key")) is None:
             return string.message
-        return self.translator.translate(LocaleStr(key=key), locale=locale)
+        return translator.translate(LocaleStr(key=key), locale=locale)

@@ -8,7 +8,7 @@ from discord.ext import commands
 
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoTasksError, TodoNotFoundError
-from lumina.l10n import LocaleStr
+from lumina.l10n import LocaleStr, translator
 from lumina.models import LuminaUser, TodoTask, get_locale
 from lumina.utils import shorten_text, split_list_to_chunks
 
@@ -26,7 +26,7 @@ class TodoModal(Modal):
     )
 
 
-class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_group_name")):
+class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_group_name")):
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 
@@ -46,9 +46,9 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         locale = await get_locale(i)
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         todo = await TodoTask.create(
-            text=message.content or i.client.translator.translate(LocaleStr("no_content"), locale=locale), user=user
+            text=message.content or translator.translate(LocaleStr("no_content"), locale=locale), user=user
         )
-        await i.followup.send(embed=todo.get_created_embed(i.client.translator, locale), ephemeral=True)
+        await i.followup.send(embed=todo.get_created_embed(locale), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("add", key="todo_add_command_name"),
@@ -61,7 +61,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         todo = await TodoTask.create(text=text, user=user)
-        await i.followup.send(embed=todo.get_created_embed(i.client.translator, await get_locale(i)), ephemeral=True)
+        await i.followup.send(embed=todo.get_created_embed(await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("done", key="todo_done_command_name"),
@@ -75,9 +75,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
             raise TodoNotFoundError
 
         await todo.mark_done()
-        await i.response.send_message(
-            embed=todo.get_done_embed(i.client.translator, await get_locale(i)), ephemeral=True
-        )
+        await i.response.send_message(embed=todo.get_done_embed(await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("remove", key="birthday_remove_command_name"),
@@ -93,9 +91,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
             raise TodoNotFoundError
 
         await todo.delete()
-        await i.response.send_message(
-            embed=todo.get_removed_embed(i.client.translator, await get_locale(i)), ephemeral=True
-        )
+        await i.response.send_message(embed=todo.get_removed_embed(await get_locale(i)), ephemeral=True)
 
     @todo_done.autocomplete("task_id")
     async def task_done_task_id_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[int]]:
@@ -105,8 +101,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         if not tasks:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(LocaleStr("no_tasks_title"), locale=await get_locale(i)),
-                    value=-1,
+                    name=translator.translate(LocaleStr("no_tasks_title"), locale=await get_locale(i)), value=-1
                 )
             ]
 
@@ -124,8 +119,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         if not tasks:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(LocaleStr("no_tasks_title"), locale=await get_locale(i)),
-                    value=-1,
+                    name=translator.translate(LocaleStr("no_tasks_title"), locale=await get_locale(i)), value=-1
                 )
             ]
 
@@ -167,11 +161,11 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("todo", key="t
         embeds: list[DefaultEmbed] = []
 
         for index, tasks_ in enumerate(chunked_tasks):
-            embeds.append(TodoTask.get_list_embed(i.client.translator, locale, todos=tasks_, start=1 + index * 10))
+            embeds.append(TodoTask.get_list_embed(locale, todos=tasks_, start=1 + index * 10))
 
-        view = Paginator(embeds, translator=i.client.translator, locale=locale)
+        view = Paginator(embeds, locale=locale)
         await view.start(i)
 
 
 async def setup(bot: Lumina) -> None:
-    await bot.add_cog(ReminderCog(bot))
+    await bot.add_cog(TodoCog(bot))

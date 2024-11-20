@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from lumina.components import Button, Modal, Paginator, TextInput, View
 from lumina.exceptions import DidNotSetBirthdayError, InvalidInputError, NoBirthdaysError
-from lumina.l10n import LocaleStr, Translator
+from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale
 from lumina.types import UserOrMember  # noqa: TCH001
 from lumina.utils import absolute_send, split_list_to_chunks
@@ -27,8 +27,8 @@ class BirthdayModal(Modal):
 
 
 class LeapYearNotifyView(View):
-    def __init__(self, translator: Translator, locale: Locale, *, birthday: Birthday) -> None:
-        super().__init__(translator, locale)
+    def __init__(self, locale: Locale, *, birthday: Birthday) -> None:
+        super().__init__(locale)
 
         self.birthday = birthday
 
@@ -49,7 +49,7 @@ class NotifyButton(Button[LeapYearNotifyView]):
         self.view.birthday.leap_year_notify_day = self.day
         await self.view.birthday.save(update_fields=("leap_year_notify_month", "leap_year_notify_day"))
 
-        embed = LuminaUser.get_settings_saved_embed(self.view.translator, self.view.locale)
+        embed = LuminaUser.get_settings_saved_embed(self.view.locale)
         await i.response.send_message(embed=embed, ephemeral=True)
 
 
@@ -76,7 +76,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
     async def set_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
         modal = BirthdayModal(title=LocaleStr("birthday_modal_title"))
-        modal.translate(i.client.translator, await get_locale(i))
+        modal.translate(await get_locale(i))
 
         await i.response.send_modal(modal)
         await modal.wait()
@@ -104,14 +104,10 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             birthday.day = day
             await birthday.save(update_fields=("month", "day"))
 
-        embeds = [
-            Birthday.get_created_embed(
-                i.client.translator, locale, user=user, month=month, day=day, timezone=lumina_user.timezone
-            )
-        ]
+        embeds = [Birthday.get_created_embed(locale, user=user, month=month, day=day, timezone=lumina_user.timezone)]
         if (month, day) == (2, 29):
-            embeds.append(Birthday.get_leap_year_notify_embed(i.client.translator, locale))
-            view = LeapYearNotifyView(i.client.translator, locale, birthday=birthday)
+            embeds.append(Birthday.get_leap_year_notify_embed(locale))
+            view = LeapYearNotifyView(locale, birthday=birthday)
         else:
             view = None
 
@@ -124,9 +120,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(user_id=user.id)
 
         await bday.delete()
-        await i.response.send_message(
-            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user), ephemeral=True
-        )
+        await i.response.send_message(embed=Birthday.get_removed_embed(await get_locale(i), user=user), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("set", key="birthday_set_command_name"),
@@ -161,8 +155,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         if month is None:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(LocaleStr("select_month_first"), locale=await get_locale(i)),
-                    value=-1,
+                    name=translator.translate(LocaleStr("select_month_first"), locale=await get_locale(i)), value=-1
                 )
             ]
 
@@ -190,9 +183,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(user_id=user.id)
 
         await bday.delete()
-        await i.followup.send(
-            embed=Birthday.get_removed_embed(i.client.translator, await get_locale(i), user=user), ephemeral=True
-        )
+        await i.followup.send(embed=Birthday.get_removed_embed(await get_locale(i), user=user), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
@@ -212,13 +203,9 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         embeds: list[DefaultEmbed] = []
 
         for index, bdays in enumerate(split_birthdays):
-            embeds.append(
-                Birthday.get_list_embed(
-                    i.client.translator, locale, birthdays=bdays, timezone=timezone, start=1 + index * 10
-                )
-            )
+            embeds.append(Birthday.get_list_embed(locale, birthdays=bdays, timezone=timezone, start=1 + index * 10))
 
-        view = Paginator(embeds, translator=i.client.translator, locale=locale)
+        view = Paginator(embeds, locale=locale)
         await view.start(i)
 
 

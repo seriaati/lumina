@@ -6,6 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from lumina.exceptions import InvalidInputError
+from lumina.l10n import translator
 from lumina.models import LuminaUser, get_locale
 
 if TYPE_CHECKING:
@@ -25,7 +26,7 @@ class SettingsCog(commands.Cog):
     )
     @app_commands.rename(lang=app_commands.locale_str("language", key="lang_param_name"))
     async def set_lang_command(self, i: Interaction, lang: str) -> None:
-        if lang not in i.client.translator.translations:
+        if lang not in translator.translations:
             raise InvalidInputError(lang)
 
         await i.response.defer(ephemeral=True)
@@ -34,14 +35,14 @@ class SettingsCog(commands.Cog):
         user.lang = lang
         await user.save(update_fields=("lang",))
 
-        embed = user.get_settings_saved_embed(i.client.translator, await get_locale(i))
+        embed = user.get_settings_saved_embed(await get_locale(i))
         await i.followup.send(embed=embed, ephemeral=True)
 
     @set_lang_command.autocomplete("lang")
-    async def lang_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[str]]:
+    async def lang_autocomplete(self, _: Interaction, current: str) -> list[app_commands.Choice[str]]:
         return [
             app_commands.Choice(name=translations["lang_name"], value=key)
-            for key, translations in i.client.translator.translations.items()
+            for key, translations in translator.translations.items()
             if current.lower() in key.lower()
         ][:25]
 
@@ -59,7 +60,7 @@ class SettingsCog(commands.Cog):
         await user.save(update_fields=("timezone",))
         await self.bot.scheduler.schedule_reminder()
 
-        embed = user.get_settings_saved_embed(i.client.translator, await get_locale(i))
+        embed = user.get_settings_saved_embed(await get_locale(i))
         await i.followup.send(embed=embed, ephemeral=True)
 
 

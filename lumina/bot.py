@@ -13,7 +13,7 @@ from tortoise import Tortoise
 from lumina.command_tree import CommandTree
 from lumina.constants import DEFAULT_LOCALE
 from lumina.error_handler import create_error_embed
-from lumina.l10n import AppCommandTranslator, Translator
+from lumina.l10n import AppCommandTranslator, translator
 from lumina.models import Reminder
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ class ReminderScheduler:
 
     async def send_reminder(self, reminder: Reminder) -> None:
         logger.info(f"Sending reminder to {reminder.user_id}")
-        embed = reminder.get_embed(self.bot.translator, reminder.user.locale or DEFAULT_LOCALE)
+        embed = reminder.get_embed(reminder.user.locale or DEFAULT_LOCALE)
         success = await self.bot.dm_user(reminder.user_id, embed=embed)
         if success:
             await reminder.delete()
@@ -62,7 +62,6 @@ class ReminderScheduler:
 
 class Lumina(commands.Bot):
     def __init__(self) -> None:
-        self.translator = Translator()
         self.scheduler = ReminderScheduler(self)
 
         super().__init__(
@@ -83,7 +82,7 @@ class Lumina(commands.Bot):
         await Tortoise.generate_schemas()
 
     async def _setup_translator(self) -> None:
-        await self.translator.load()
+        await translator.load()
 
     async def _load_cogs(self) -> None:
         for file_path in pathlib.Path("./lumina/cogs").rglob("*.py"):
@@ -111,11 +110,11 @@ class Lumina(commands.Bot):
         await self._setup_translator()
         await self._load_cogs()
 
-        await self.tree.set_translator(AppCommandTranslator(self.translator))
+        await self.tree.set_translator(AppCommandTranslator())
         await self.scheduler.schedule_reminder()
 
     def create_error_embed(self, error: Exception, *, locale: discord.Locale) -> tuple[ErrorEmbed, bool]:
-        return create_error_embed(error, translator=self.translator, locale=locale)
+        return create_error_embed(error, locale=locale)
 
     async def dm_user(self, user_id: int, *, embed: discord.Embed) -> bool:
         try:

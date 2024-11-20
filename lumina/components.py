@@ -7,7 +7,7 @@ from discord.ui.item import Item
 from loguru import logger
 
 from lumina.exceptions import InvalidInputError
-from lumina.l10n import LocaleStr
+from lumina.l10n import LocaleStr, translator
 from lumina.utils import absolute_send
 
 if TYPE_CHECKING:
@@ -16,14 +16,13 @@ if TYPE_CHECKING:
     from discord.ui.item import Item
 
     from lumina.embeds import LuminaEmbed
-    from lumina.l10n import Translator
     from lumina.types import Interaction
 
 V_co = TypeVar("V_co", bound="View", covariant=True)
 
 
 class View(discord.ui.View):
-    def __init__(self, translator: Translator, locale: discord.Locale) -> None:
+    def __init__(self, locale: discord.Locale) -> None:
         self.translator = translator
         self.locale = locale
         self.message: discord.Message | None = None
@@ -51,7 +50,7 @@ class View(discord.ui.View):
         await self.message.edit(view=self)
 
     def add_item(self, item: Button) -> Self:
-        item.translate(self.translator, self.locale)
+        item.translate(self.locale)
         return super().add_item(item)
 
 
@@ -80,7 +79,7 @@ class Button(discord.ui.Button, Generic[V_co]):
             row=row,
         )
 
-    def translate(self, translator: Translator, locale: discord.Locale) -> None:
+    def translate(self, locale: discord.Locale) -> None:
         if isinstance(self.locale_label, LocaleStr):
             self.label = translator.translate(self.locale_label, locale=locale)
 
@@ -112,13 +111,13 @@ class Modal(discord.ui.Modal):
             isinstance(child, discord.ui.TextInput) and child.required and not child.value for child in self.children
         )
 
-    def translate(self, translator: Translator, locale: discord.Locale) -> None:
+    def translate(self, locale: discord.Locale) -> None:
         if isinstance(self.locale_title, LocaleStr):
             self.title = translator.translate(self.locale_title, locale=locale).title()
 
         for child in self.children:
             if isinstance(child, TextInput):
-                child.translate(translator, locale=locale)
+                child.translate(locale=locale)
 
 
 class TextInput(discord.ui.TextInput):
@@ -152,7 +151,7 @@ class TextInput(discord.ui.TextInput):
         self.min_value = min_value
         self.max_value = max_value
 
-    def translate(self, translator: Translator, locale: discord.Locale) -> None:
+    def translate(self, locale: discord.Locale) -> None:
         if isinstance(self.locale_label, LocaleStr):
             self.label = translator.translate(self.locale_label, locale=locale)
 
@@ -182,8 +181,8 @@ class TextInput(discord.ui.TextInput):
 
 
 class Paginator(View):
-    def __init__(self, embeds: Sequence[LuminaEmbed], *, translator: Translator, locale: discord.Locale) -> None:
-        super().__init__(translator, locale)
+    def __init__(self, embeds: Sequence[LuminaEmbed], *, locale: discord.Locale) -> None:
+        super().__init__(locale)
         self._embeds = embeds
         self._page = 0
 

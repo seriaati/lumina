@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from lumina.components import Modal, Paginator, TextInput
 from lumina.exceptions import NoNotesError, NoteNotFoundError
-from lumina.l10n import LocaleStr
+from lumina.l10n import LocaleStr, translator
 from lumina.models import LuminaUser, Notes, get_locale
 from lumina.utils import shorten_text, split_list_to_chunks
 
@@ -46,7 +46,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         modal = NotesModal(title=LocaleStr("notes_modal_title"))
         if message is not None:
             modal.note_content.default = message.content
-        modal.translate(i.client.translator, locale)
+        modal.translate(locale)
 
         await i.response.send_modal(modal)
         await modal.wait()
@@ -55,12 +55,11 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
         notes = await Notes.create(
-            title=modal.note_title.value
-            or i.client.translator.translate(LocaleStr("notes_modal_untitled"), locale=locale),
+            title=modal.note_title.value or translator.translate(LocaleStr("notes_modal_untitled"), locale=locale),
             content=modal.note_content.value,
             user=user,
         )
-        await i.followup.send(embed=notes.get_created_embed(i.client.translator, locale), ephemeral=True)
+        await i.followup.send(embed=notes.get_created_embed(locale), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("write", key="notes_write_command_name"),
@@ -82,7 +81,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
             raise NoteNotFoundError
 
         await notes.delete()
-        await i.followup.send(embed=notes.get_removed_embed(i.client.translator, await get_locale(i)), ephemeral=True)
+        await i.followup.send(embed=notes.get_removed_embed(await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
@@ -101,9 +100,9 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         embeds: list[DefaultEmbed] = []
 
         for index, notes_ in enumerate(chunked_notes):
-            embeds.append(Notes.get_list_embed(i.client.translator, locale, notes=notes_, start=1 + index * 10))
+            embeds.append(Notes.get_list_embed(locale, notes=notes_, start=1 + index * 10))
 
-        view = Paginator(embeds, translator=i.client.translator, locale=locale)
+        view = Paginator(embeds, locale=locale)
         await view.start(i)
 
     @app_commands.command(
@@ -129,8 +128,7 @@ class NotesCog(commands.GroupCog, name=app_commands.locale_str("notes", key="not
         if not notes:
             return [
                 app_commands.Choice(
-                    name=i.client.translator.translate(LocaleStr("no_notes_title"), locale=await get_locale(i)),
-                    value=-1,
+                    name=translator.translate(LocaleStr("no_notes_title"), locale=await get_locale(i)), value=-1
                 )
             ]
 
