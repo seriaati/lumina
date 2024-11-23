@@ -12,7 +12,7 @@ from lumina.components import Button, Modal, Paginator, TextInput, View
 from lumina.exceptions import DidNotSetBirthdayError, InvalidInputError, NoBirthdaysError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale
-from lumina.types import UserOrMember  # noqa: TCH001
+from lumina.types import UserOrMember  # noqa: TC001
 from lumina.utils import absolute_send, split_list_to_chunks
 
 if TYPE_CHECKING:
