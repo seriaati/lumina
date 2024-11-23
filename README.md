@@ -56,7 +56,19 @@ Write down your thoughts, ideas, and anything you want to remember. Right click 
 - `/notes remove`
 - `/notes read`
 
-# Questions, Issues, Feedback, Contributions
+## Questions, Issues, Feedback, Contributions
 
 Whether you want to make any bug reports, feature requests, or contribute to translations, simply open an issue or pull request in this repository.  
 If GitHub is not your type, you can find me on [Discord](https://discord.com/invite/b22kMKuwbS), my username is @seria_ati.
+
+## Self Hosting
+
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+1. Clone the repository
+1. Create a `.env` file:
+
+   ```env
+   DISCORD_TOKEN=YourDiscordBotToken
+   ```
+
+1. `uv run run.py`
