@@ -144,7 +144,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         await i.response.defer(ephemeral=True)
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
-        reminders = await Reminder.filter(user=user).all()
+        reminders = await Reminder.filter(user=user).all().order_by("datetime")
         if not reminders:
             raise NoRemindersError
 
