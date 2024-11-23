@@ -79,26 +79,6 @@ todo_remove_command_description: Remove a task from your to-do list
 todo_removed_embed_title: Task Removed
 todo_removed_embed_description: "{text} is removed from your to-do list"
 no_content: "(No content)"
-notes_group_name: notes
-save_to_notes_ctx_menu_name: Save to notes
-notes_modal_title_label: Title
-notes_modal_untitled: Untitled
-notes_modal_content_label: Content
-notes_modal_title: Write a new Note
-notes_created_embed_title: Note Created
-notes_created_embed_description: "{title} is saved to your notes"
-notes_write_command_name: write
-notes_write_command_description: Write a new note
-notes_list_command_description: List all notes
-notes_remove_command_description: Remove a note
-note_parameter_name: note
-no_notes_title: You don't have any notes
-note_not_found_title: Note Not Found
-notes_removed_embed_title: Note Removed
-notes_removed_embed_description: "{title} is removed from your notes"
-notes_read_command_name: read
-notes_read_command_description: Read a note
-notes_list_embed_title: Your Notes
 select_month_first: Select a month first
 leap_year_notify_embed_title: How would you like to be notified?
 leap_year_notify_embed_description: On a non-leap year, February 29th doesn't exist
@@ -110,8 +90,6 @@ bday_remove_user_param_desc: The user whose birthday you want to remove
 bday_set_user_param_desc: The user whose birthday you want to set
 bday_set_month_param_desc: The month of the birthday
 bday_set_day_param_desc: The day of the birthday
-note_remove_param_desc: The note to remove
-note_read_param_desc: The note to read
 reminder_set_when_param_desc: When to remind you (e.g. in 1 hour, December 21st)
 reminder_set_text_param_desc: What to remind you of
 reminder_remove_param_desc: The reminder to remove

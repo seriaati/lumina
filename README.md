@@ -47,15 +47,6 @@ Lumina can help you keep track of your tasks, right click on any Discord message
 - `/todo remove`
 - `/todo done`
 
-### Notes
-
-Write down your thoughts, ideas, and anything you want to remember. Right click on any Discord message to add it to your notes.
-
-- `/notes write`
-- `/notes list`
-- `/notes remove`
-- `/notes read`
-
 ## Questions, Issues, Feedback, Contributions
 
 Whether you want to make any bug reports, feature requests, or contribute to translations, simply open an issue or pull request in this repository.  
