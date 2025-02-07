@@ -16,8 +16,8 @@ Lumina is a simple and minimal Discord bot that helps you organize your life.
 
 ## Installation
 
-Lumina is available both as an user app and a server bot. Install Lumina by clicking [here](https://discord.com/oauth2/authorize?client_id=1284303963533082684).  
-Since Lumina is an user app, you can use it in any servers, including DMs.  
+Lumina is available both as a user app and a server bot. Install Lumina by clicking [here](https://discord.com/oauth2/authorize?client_id=1284303963533082684).  
+Since Lumina is a user app, you can use it in any servers, including DMs.  
 Every single Lumina response can only be seen by you, reminders are sent through DMs.
 
 ## Features
