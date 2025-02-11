@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from lumina.embeds import DefaultEmbed
     from lumina.types import Interaction
 
+FEBRUARY = 2
+
 
 class BirthdayModal(Modal):
     month = TextInput(label=LocaleStr("birthday_modal_month_label"), is_integer=True, min_value=1, max_value=12)
@@ -87,7 +89,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
     async def set_birthday(self, i: Interaction, user: UserOrMember, month: int, day: int) -> None:
         num_days = calendar.monthrange(2000, month)[1]
-        if month == 2:
+        if month == FEBRUARY:
             num_days = 29
 
         if day > num_days:
@@ -165,7 +167,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             ]
 
         num_days = calendar.monthrange(2000, month)[1]
-        if month == 2:
+        if month == FEBRUARY:
             num_days = 29
 
         return [
