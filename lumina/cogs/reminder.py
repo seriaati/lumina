@@ -38,7 +38,7 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
         cal = parsedatetime.Calendar()
         time_struct, _ = cal.parse(time, get_now(timezone))
-        dt = datetime.datetime(*time_struct[:6]).replace(tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+        dt = datetime.datetime(*time_struct[:6], tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
         if dt < get_now(timezone):
             raise NotFutureTimeError
         return dt
