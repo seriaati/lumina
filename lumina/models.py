@@ -19,7 +19,10 @@ if TYPE_CHECKING:
 
 class BaseModel(Model):
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}({', '.join(f'{field}={getattr(self, field)!r}' for field in self._meta.db_fields if hasattr(self, field))})"
+        attrs_str = ", ".join(
+            f"{field}={getattr(self, field)!r}" for field in self._meta.db_fields if hasattr(self, field)
+        )
+        return f"{self.__class__.__name__}({attrs_str})"
 
     def __repr__(self) -> str:
         return str(self)
@@ -79,6 +82,10 @@ class Birthday(BaseModel):
         except ValueError:
             return dt.replace(year=next_leap_year())
 
+    def get_timestamp_md(self, timezone: int) -> str:
+        """Get the timestamp in Discord-flavor markdown."""
+        return discord.utils.format_dt(Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone), "D")
+
     @staticmethod
     def get_created_embed(
         locale: discord.Locale, *, user: UserOrMember, month: int, day: int, timezone: int
@@ -108,7 +115,7 @@ class Birthday(BaseModel):
             locale=locale,
             title=LocaleStr("birthday_list_embed_title"),
             description="\n".join(
-                f"{i}. <@{bday.bday_user_id}>: {discord.utils.format_dt(Birthday.get_correct_dt(month=bday.month, day=bday.day, timezone=timezone), 'D')}"
+                f"{i}. <@{bday.bday_user_id}>: {bday.get_timestamp_md(timezone)}"
                 for i, bday in enumerate(birthdays, start=start)
             ),
         )
