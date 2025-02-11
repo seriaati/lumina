@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import calendar
 import datetime
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -11,10 +11,8 @@ if TYPE_CHECKING:
 
     from lumina.types import Interaction
 
-T = TypeVar("T")
 
-
-def split_list_to_chunks(lst: list[T], chunk_size: int) -> list[list[T]]:
+def split_list_to_chunks[T](lst: list[T], chunk_size: int) -> list[list[T]]:
     return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
 
