@@ -2,48 +2,46 @@ line-length = 120
 target-version = "py312"
 
 [lint]
-ignore = [
-  "E501",
-  "ANN401",
-  "ANN101",
-  "ANN102",
-  "PLR0913",
-  "PLR2004",
-  "PLR0917",
-  "PLR6301",
-  "ANN002",
-  "ERA001",
-  "RUF100",
-]
 preview = true
 select = [
+  "F",
   "E",
   "W",
   "C90",
-  "F",
-  "UP",
-  "B",
-  "SIM",
   "I",
   "N",
-  "TCH",
+  "UP",
   "ANN",
   "ASYNC",
+  "S",
+  "FBT",
+  "B",
   "A",
   "C4",
+  "DTZ",
   "EM",
   "FA",
-  "ICN",
+  "ISC",
+  "LOG",
   "G",
   "PIE",
   "T20",
+  "PT",
+  "RSE",
+  "RET",
+  "SLOT",
+  "SIM",
+  "TC",
   "ARG",
-  "ERA",
-  "LOG",
+  "PTH",
   "PL",
   "TRY",
+  "FAST",
+  "PERF",
+  "FURB",
   "RUF",
 ]
+ignore = ["PLR0913", "ANN401", "PLR6301"]
 
 [lint.per-file-ignores]
 "**/__init__.py" = ["F403", "F401"]
