@@ -41,7 +41,7 @@ select = [
   "FURB",
   "RUF",
 ]
-ignore = ["PLR0913", "ANN401", "PLR6301"]
+ignore = ["PLR0913", "ANN401", "PLR6301", "UP046"]
 
 [lint.per-file-ignores]
 "**/__init__.py" = ["F403", "F401"]
