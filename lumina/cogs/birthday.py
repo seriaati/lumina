@@ -3,13 +3,11 @@ from __future__ import annotations
 import calendar
 from typing import TYPE_CHECKING, Any
 
-import tortoise
-import tortoise.exceptions
 from discord import ButtonStyle, Locale, app_commands
 from discord.ext import commands
 
 from lumina.components import Button, Modal, Paginator, TextInput, View
-from lumina.exceptions import DidNotSetBirthdayError, InvalidInputError, NoBirthdaysError
+from lumina.exceptions import DidNotSetBirthdayError, InvalidBirthdayInputError, InvalidInputError, NoBirthdaysError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale
 from lumina.types import UserOrMember  # noqa: TC001
@@ -65,7 +63,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         )
         self.remove_bday_ctx_menu = app_commands.ContextMenu(
             name=app_commands.locale_str("Remove birthday", key="remove_birthday_ctx_menu_name"),
-            callback=self.remove_birthday,
+            callback=self.remove_birthday_ctx_menu,
         )
 
     async def cog_load(self) -> None:
@@ -87,9 +85,15 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
         await self.set_birthday(i, month=int(modal.month.value), day=int(modal.day.value), user=user)
 
+    async def remove_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
+        await self.remove_birthday(i, user=user)
+
     async def set_birthday(
         self, i: Interaction, *, month: int, day: int, user: UserOrMember | None = None, name: str | None = None
     ) -> None:
+        if (user is None and name is None) or (user is not None and name is not None):
+            raise InvalidBirthdayInputError
+
         num_days = calendar.monthrange(2000, month)[1]
         if month == FEBRUARY:
             num_days = 29
@@ -100,23 +104,13 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
         locale = await get_locale(i)
 
-        bday_user_id = 0 if user is None else user.id
-
-        try:
-            bday = await Birthday.create(
-                bday_user_id=bday_user_id, bday_username=name, user=lumina_user, month=month, day=day
-            )
-        except tortoise.exceptions.IntegrityError:
-            bday = await Birthday.get(bday_user_id=bday_user_id, user=lumina_user, bday_username=name)
-            bday.month = month
-            bday.day = day
-            await bday.save(update_fields=("month", "day"))
-
+        bday = await Birthday.create_or_update(lumina_user.id, month=month, day=day, user=user, name=name)
         embeds = [
             bday.get_created_embed(
                 locale, timezone=lumina_user.timezone, avatar_url=user.display_avatar.url if user is not None else None
             )
         ]
+
         if (month, day) == (2, 29):
             embeds.append(Birthday.get_leap_year_notify_embed(locale))
             view = LeapYearNotifyView(locale, birthday=bday)
@@ -125,11 +119,14 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
         await absolute_send(i, embeds=embeds, ephemeral=True, view=view)
 
-    async def remove_birthday(self, i: Interaction, user: UserOrMember) -> Any:
+    async def remove_birthday(self, i: Interaction, user: UserOrMember | None = None, name: str | None = None) -> Any:
+        if (user is None and name is None) or (user is not None and name is not None):
+            raise InvalidBirthdayInputError
+
         lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
-        bday = await Birthday.get_or_none(bday_user_id=user.id, user=lumina_user)
+        bday = await Birthday.get_or_none(lumina_user.id, user=user, name=name)
         if bday is None:
-            raise DidNotSetBirthdayError(user_id=user.id)
+            raise DidNotSetBirthdayError(f"<@{user.id}>" if user is not None else name)  # type: ignore[reportArgumentType]
 
         await bday.delete()
         await i.response.send_message(embed=bday.get_removed_embed(await get_locale(i)), ephemeral=True)
@@ -193,12 +190,16 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         name=app_commands.locale_str("remove", key="birthday_remove_command_name"),
         description=app_commands.locale_str("Remove someone's birthday", key="birthday_remove_command_description"),
     )
-    @app_commands.rename(user=app_commands.locale_str("user", key="user_parameter_name"))
-    @app_commands.describe(
-        user=app_commands.locale_str("The user whose birthday you want to remove", key="bday_remove_user_param_desc")
+    @app_commands.rename(
+        user=app_commands.locale_str("user", key="user_parameter_name"),
+        name=app_commands.locale_str("name", key="name_parameter_name"),
     )
-    async def birthday_remove(self, i: Interaction, user: UserOrMember) -> None:
-        await self.remove_birthday(i, user)
+    @app_commands.describe(
+        user=app_commands.locale_str("The user whose birthday you want to remove", key="bday_remove_user_param_desc"),
+        name=app_commands.locale_str("The name of the user", key="bday_set_name_param_desc"),
+    )
+    async def birthday_remove(self, i: Interaction, user: UserOrMember | None = None, name: str | None = None) -> None:
+        await self.remove_birthday(i, user, name)
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),
@@ -222,6 +223,14 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
         view = Paginator(embeds, locale=locale)
         await view.start(i)
+
+    @birthday_set.autocomplete("name")
+    @birthday_remove.autocomplete("name")
+    async def bday_name_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[str]]:
+        bdays = await Birthday.filter(
+            bday_username__isnull=False, bday_username__icontains=current, user_id=i.user.id, bday_user_id=0
+        ).limit(25)
+        return [app_commands.Choice(name=str(bday.bday_username), value=str(bday.bday_username)) for bday in bdays]
 
 
 async def setup(bot: Lumina) -> None:

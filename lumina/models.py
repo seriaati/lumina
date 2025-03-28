@@ -8,13 +8,14 @@ import discord
 from tortoise import Model, fields
 
 from lumina.embeds import DefaultEmbed
+from lumina.exceptions import InvalidBirthdayInputError
 from lumina.l10n import LocaleStr
 from lumina.utils import get_now, next_leap_year, shorten_text
 
 if TYPE_CHECKING:
     import datetime
 
-    from lumina.types import Interaction
+    from lumina.types import Interaction, UserOrMember
 
 
 class BaseModel(Model):
@@ -140,6 +141,35 @@ class Birthday(BaseModel):
             locale=locale,
             title=LocaleStr("birthday_embed_title", params={"user": self.user_str}),
             description=LocaleStr("birthday_embed_description", params={"user": self.user_str}),
+        )
+
+    @classmethod
+    async def get_or_none(
+        cls, user_id: int, *, user: UserOrMember | None = None, name: str | None = None
+    ) -> Birthday | None:
+        if user is None and name is None:
+            raise InvalidBirthdayInputError
+
+        if user is None:
+            return await super().get_or_none(bday_user_id=0, user_id=user_id, bday_username=name)
+        return await super().get_or_none(bday_user_id=user.id, user_id=user_id)
+
+    @classmethod
+    async def create_or_update(
+        cls, user_id: int, *, month: int, day: int, user: UserOrMember | None = None, name: str | None = None
+    ) -> Birthday:
+        if (user is None and name is None) or (user is not None and name is not None):
+            raise InvalidBirthdayInputError
+
+        bday = await cls.get_or_none(user_id, user=user, name=name)
+        if bday is not None:
+            bday.month = month
+            bday.day = day
+            await bday.save(update_fields=("month", "day"))
+            return bday
+
+        return await super().create(
+            user_id=user_id, bday_user_id=user.id if user is not None else 0, bday_username=name, month=month, day=day
         )
 
     class Meta:

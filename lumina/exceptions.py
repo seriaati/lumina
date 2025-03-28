@@ -17,10 +17,10 @@ class InvalidInputError(LuminaError):
 
 
 class DidNotSetBirthdayError(LuminaError):
-    def __init__(self, user_id: int) -> None:
+    def __init__(self, user: str) -> None:
         super().__init__(
             LocaleStr("did_not_set_birthday_title"),
-            LocaleStr("did_not_set_birthday_description", params={"user_id": user_id}),
+            LocaleStr("did_not_set_birthday_description", params={"user": user}),
         )
 
 
@@ -49,16 +49,11 @@ class NoTasksError(LuminaError):
         super().__init__(LocaleStr("no_tasks_title"))
 
 
-class NoNotesError(LuminaError):
-    def __init__(self) -> None:
-        super().__init__(LocaleStr("no_notes_title"))
-
-
-class NoteNotFoundError(LuminaError):
-    def __init__(self) -> None:
-        super().__init__(LocaleStr("note_not_found_title"))
-
-
 class NotFutureTimeError(LuminaError):
     def __init__(self) -> None:
         super().__init__(LocaleStr("not_future_time_error"))
+
+
+class InvalidBirthdayInputError(LuminaError):
+    def __init__(self) -> None:
+        super().__init__(LocaleStr("bday_invalid_input_error_title"), LocaleStr("bday_invalid_input_error_desc"))
