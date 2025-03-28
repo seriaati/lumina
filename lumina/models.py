@@ -14,6 +14,7 @@ from lumina.utils import get_now, next_leap_year, shorten_text
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Sequence
 
     from lumina.types import Interaction, UserOrMember
 
@@ -118,7 +119,9 @@ class Birthday(BaseModel):
         )
 
     @staticmethod
-    def get_list_embed(locale: discord.Locale, *, birthdays: list[Birthday], timezone: int, start: int) -> DefaultEmbed:
+    def get_list_embed(
+        locale: discord.Locale, *, birthdays: Sequence[Birthday], timezone: int, start: int
+    ) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_list_embed_title"),

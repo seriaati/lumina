@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import calendar
+import itertools
 from typing import TYPE_CHECKING, Any
 
 from discord import ButtonStyle, Locale, app_commands
@@ -11,7 +12,7 @@ from lumina.exceptions import DidNotSetBirthdayError, InvalidBirthdayInputError,
 from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale
 from lumina.types import UserOrMember  # noqa: TC001
-from lumina.utils import absolute_send, split_list_to_chunks
+from lumina.utils import absolute_send
 
 if TYPE_CHECKING:
     from lumina.bot import Lumina
@@ -209,11 +210,11 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         await i.response.defer(ephemeral=True)
 
         user, _ = await LuminaUser.get_or_create(id=i.user.id)
-        birthdays = await Birthday.filter(user=user).all()
+        birthdays = await Birthday.filter(user=user).order_by("month", "day")
         if not birthdays:
             raise NoBirthdaysError
 
-        split_birthdays = split_list_to_chunks(birthdays, 10)
+        split_birthdays = itertools.batched(birthdays, 10)
         timezone = (await LuminaUser.get_or_create(id=i.user.id))[0].timezone
         locale = await get_locale(i)
         embeds: list[DefaultEmbed] = []
