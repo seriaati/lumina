@@ -1,6 +1,6 @@
 unknown_error: An unknown error occurred
-birthday_embed_title: Today is someone's birthday!
-birthday_embed_description: Say happy birthday to <@{user_id}>
+birthday_embed_title: Today is {user}'s birthday!
+birthday_embed_description: Say happy birthday to {user}
 message_reminder_embed_description: "[Go to message]({message_url})\nCreated at {created_at}"
 reminder_embed_description: "Created at {created_at}"
 birthday_modal_title: Set Birthday Date
@@ -9,9 +9,9 @@ birthday_modal_day_label: Day
 invalid_input_title: Invalid Input
 invalid_input_description: The input {value} is invalid, please try again.
 birthday_complete_embed_title: Birthday Set
-birthday_complete_embed_description: <@{user_id}>'s birthday has been set to {dt}
+birthday_complete_embed_description: "{user}'s birthday has been set to {dt}"
 birthday_removed_embed_title: Birthday Removed
-birthday_removed_embed_description: <@{user_id}>'s birthday has been removed
+birthday_removed_embed_description: "{user}'s birthday has been removed"
 birthday_set_command_description: Set someone's birthday
 birthday_remove_command_description: Remove someone's birthday
 set_birthday_ctx_menu_name: Set birthday
@@ -19,7 +19,7 @@ user_parameter_name: user
 day_parameter_name: day
 month_parameter_name: month
 did_not_set_birthday_title: Birthday not set for This User
-did_not_set_birthday_description: You have not set a birthday for <@{user_id}> yet
+did_not_set_birthday_description: You have not set a birthday for {user} yet
 birthday_list_command_description: List all birthdays you have set
 no_birthdays_title: No Birthdays Set
 birthday_group_name: birthday
@@ -98,3 +98,5 @@ timezone_param_desc: The UTC timezone to set (e.g. +4, -3)
 todo_add_text_param_desc: The task to add
 task_param_desc: The task to mark as done
 task_remove_param_desc: The task to remove
+name_parameter_name: name
+bday_set_name_param_desc: The name of the user

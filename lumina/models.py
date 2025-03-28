@@ -14,7 +14,7 @@ from lumina.utils import get_now, next_leap_year, shorten_text
 if TYPE_CHECKING:
     import datetime
 
-    from lumina.types import Interaction, UserOrMember
+    from lumina.types import Interaction
 
 
 class BaseModel(Model):
@@ -55,6 +55,7 @@ class Birthday(BaseModel):
     id = fields.BigIntField(pk=True, generated=True)
 
     bday_user_id = fields.BigIntField()
+    bday_username: fields.Field[str | None] = fields.CharField(max_length=100, null=True)
     user: fields.ForeignKeyRelation[LuminaUser] = fields.ForeignKeyField("models.LuminaUser", related_name="birthdays")
     user_id: fields.BigIntField
 
@@ -64,6 +65,11 @@ class Birthday(BaseModel):
     leap_year_notify_month: fields.Field[int | None] = fields.IntField(null=True)
     leap_year_notify_day: fields.Field[int | None] = fields.IntField(null=True)
     last_notify_year = fields.IntField(default=0)
+
+    @property
+    def user_str(self) -> str:
+        user_str = f"<@{self.user_id}>" if self.user_id == 0 else self.bday_username
+        return "???" if user_str is None else user_str
 
     @staticmethod
     def get_correct_dt(*, month: int, day: int, timezone: int) -> datetime.datetime:
@@ -86,27 +92,28 @@ class Birthday(BaseModel):
         """Get the timestamp in Discord-flavor markdown."""
         return discord.utils.format_dt(Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone), "D")
 
-    @staticmethod
     def get_created_embed(
-        locale: discord.Locale, *, user: UserOrMember, month: int, day: int, timezone: int
+        self, locale: discord.Locale, *, timezone: int, avatar_url: str | None = None
     ) -> DefaultEmbed:
-        dt = Birthday.get_correct_dt(month=month, day=day, timezone=timezone)
-
-        return DefaultEmbed(
+        dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
+        embed = DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_complete_embed_title"),
             description=LocaleStr(
                 "birthday_complete_embed_description",
-                params={"user_id": user.id, "dt": discord.utils.format_dt(dt, "D")},
+                params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
             ),
-        ).set_thumbnail(url=user.display_avatar.url)
+        )
+        if avatar_url is not None:
+            embed.set_thumbnail(url=avatar_url)
 
-    @staticmethod
-    def get_removed_embed(locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
+        return embed
+
+    def get_removed_embed(self, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_removed_embed_title"),
-            description=LocaleStr("birthday_removed_embed_description", params={"user_id": user.id}),
+            description=LocaleStr("birthday_removed_embed_description", params={"user": self.user_str}),
         )
 
     @staticmethod
@@ -115,7 +122,7 @@ class Birthday(BaseModel):
             locale=locale,
             title=LocaleStr("birthday_list_embed_title"),
             description="\n".join(
-                f"{i}. <@{bday.bday_user_id}>: {bday.get_timestamp_md(timezone)}"
+                f"{i}. {bday.user_str}: {bday.get_timestamp_md(timezone)}"
                 for i, bday in enumerate(birthdays, start=start)
             ),
         )
@@ -131,12 +138,12 @@ class Birthday(BaseModel):
     def get_embed(self, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
-            title=LocaleStr("birthday_embed_title"),
-            description=LocaleStr("birthday_embed_description", params={"user_id": self.bday_user_id}),
+            title=LocaleStr("birthday_embed_title", params={"user": self.user_str}),
+            description=LocaleStr("birthday_embed_description", params={"user": self.user_str}),
         )
 
     class Meta:
-        unique_together = ("bday_user_id", "user")
+        unique_together = ("bday_user_id", "user", "bday_username")
 
 
 class Reminder(BaseModel):

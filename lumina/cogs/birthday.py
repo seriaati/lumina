@@ -85,9 +85,11 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         if modal.incomplete:
             return
 
-        await self.set_birthday(i, user, int(modal.month.value), int(modal.day.value))
+        await self.set_birthday(i, month=int(modal.month.value), day=int(modal.day.value), user=user)
 
-    async def set_birthday(self, i: Interaction, user: UserOrMember, month: int, day: int) -> None:
+    async def set_birthday(
+        self, i: Interaction, *, month: int, day: int, user: UserOrMember | None = None, name: str | None = None
+    ) -> None:
         num_days = calendar.monthrange(2000, month)[1]
         if month == FEBRUARY:
             num_days = 29
@@ -98,18 +100,26 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
         locale = await get_locale(i)
 
-        try:
-            birthday = await Birthday.create(bday_user_id=user.id, user=lumina_user, month=month, day=day)
-        except tortoise.exceptions.IntegrityError:
-            birthday = await Birthday.get(bday_user_id=user.id, user=lumina_user)
-            birthday.month = month
-            birthday.day = day
-            await birthday.save(update_fields=("month", "day"))
+        bday_user_id = 0 if user is None else user.id
 
-        embeds = [Birthday.get_created_embed(locale, user=user, month=month, day=day, timezone=lumina_user.timezone)]
+        try:
+            bday = await Birthday.create(
+                bday_user_id=bday_user_id, bday_username=name, user=lumina_user, month=month, day=day
+            )
+        except tortoise.exceptions.IntegrityError:
+            bday = await Birthday.get(bday_user_id=bday_user_id, user=lumina_user, bday_username=name)
+            bday.month = month
+            bday.day = day
+            await bday.save(update_fields=("month", "day"))
+
+        embeds = [
+            bday.get_created_embed(
+                locale, timezone=lumina_user.timezone, avatar_url=user.display_avatar.url if user is not None else None
+            )
+        ]
         if (month, day) == (2, 29):
             embeds.append(Birthday.get_leap_year_notify_embed(locale))
-            view = LeapYearNotifyView(locale, birthday=birthday)
+            view = LeapYearNotifyView(locale, birthday=bday)
         else:
             view = None
 
@@ -122,31 +132,34 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(user_id=user.id)
 
         await bday.delete()
-        await i.response.send_message(embed=Birthday.get_removed_embed(await get_locale(i), user=user), ephemeral=True)
+        await i.response.send_message(embed=bday.get_removed_embed(await get_locale(i)), ephemeral=True)
 
     @app_commands.command(
         name=app_commands.locale_str("set", key="birthday_set_command_name"),
         description=app_commands.locale_str("Set someone's birthday", key="birthday_set_command_description"),
     )
     @app_commands.rename(
-        user=app_commands.locale_str("user", key="user_parameter_name"),
         month=app_commands.locale_str("month", key="month_parameter_name"),
         day=app_commands.locale_str("day", key="day_parameter_name"),
+        user=app_commands.locale_str("user", key="user_parameter_name"),
+        name=app_commands.locale_str("name", key="name_parameter_name"),
     )
     @app_commands.describe(
         user=app_commands.locale_str("The user whose birthday you want to set", key="bday_set_user_param_desc"),
         month=app_commands.locale_str("The month of the birthday", key="bday_set_month_param_desc"),
         day=app_commands.locale_str("The day of the birthday", key="bday_set_day_param_desc"),
+        name=app_commands.locale_str("The name of the user", key="bday_set_name_param_desc"),
     )
     async def birthday_set(
         self,
         i: Interaction,
-        user: UserOrMember,
         month: app_commands.Range[int, 1, 12],
         day: app_commands.Range[int, 1, 31],
+        user: UserOrMember | None = None,
+        name: str | None = None,
     ) -> None:
         await i.response.defer(ephemeral=True)
-        await self.set_birthday(i, user, month, day)
+        await self.set_birthday(i, month=month, day=day, user=user, name=name)
 
     @birthday_set.autocomplete("month")
     async def month_autocomplete(self, _: Interaction, current: str) -> list[app_commands.Choice[int]]:
@@ -185,15 +198,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         user=app_commands.locale_str("The user whose birthday you want to remove", key="bday_remove_user_param_desc")
     )
     async def birthday_remove(self, i: Interaction, user: UserOrMember) -> None:
-        await i.response.defer(ephemeral=True)
-
-        lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
-        bday = await Birthday.get_or_none(bday_user_id=user.id, user=lumina_user)
-        if bday is None:
-            raise DidNotSetBirthdayError(user_id=user.id)
-
-        await bday.delete()
-        await i.followup.send(embed=Birthday.get_removed_embed(await get_locale(i), user=user), ephemeral=True)
+        await self.remove_birthday(i, user)
 
     @app_commands.command(
         name=app_commands.locale_str("list", key="birthday_list_command_name"),

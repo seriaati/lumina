@@ -46,7 +46,7 @@ class ScheduleCog(commands.Cog):
                 ):
                     continue
 
-                logger.info(f"Sending birthday reminder to {birthday.bday_user_id}")
+                logger.info(f"Sending birthday reminder to {birthday.user_id}")
                 await birthday.fetch_related("user")
                 embed = birthday.get_embed(birthday.user.locale or DEFAULT_LOCALE)
                 success = await self.bot.dm_user(birthday.user_id, embed=embed)
