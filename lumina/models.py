@@ -68,7 +68,7 @@ class Birthday(BaseModel):
 
     @property
     def user_str(self) -> str:
-        user_str = f"<@{self.user_id}>" if self.user_id == 0 else self.bday_username
+        user_str = f"<@{self.bday_user_id}>" if self.bday_user_id != 0 else self.bday_username
         return "???" if user_str is None else user_str
 
     @staticmethod
