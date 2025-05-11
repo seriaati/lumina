@@ -66,14 +66,20 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             name=app_commands.locale_str("Remove birthday", key="remove_birthday_ctx_menu_name"),
             callback=self.remove_birthday_ctx_menu,
         )
+        self.see_bday_ctx_menu = app_commands.ContextMenu(
+            name=app_commands.locale_str("See birthday", key="see_birthday_ctx_menu_name"),
+            callback=self.see_birthday_ctx_menu,
+        )
 
     async def cog_load(self) -> None:
         self.bot.tree.add_command(self.remove_bday_ctx_menu)
         self.bot.tree.add_command(self.set_bday_ctx_menu)
+        self.bot.tree.add_command(self.see_bday_ctx_menu)
 
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(self.set_bday_ctx_menu.name, type=self.set_bday_ctx_menu.type)
         self.bot.tree.remove_command(self.remove_bday_ctx_menu.name, type=self.remove_bday_ctx_menu.type)
+        self.bot.tree.remove_command(self.see_bday_ctx_menu.name, type=self.see_bday_ctx_menu.type)
 
     async def set_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
         modal = BirthdayModal(title=LocaleStr("birthday_modal_title"))
@@ -88,6 +94,20 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
 
     async def remove_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
         await self.remove_birthday(i, user=user)
+
+    async def see_birthday_ctx_menu(self, i: Interaction, user: UserOrMember) -> Any:
+        await i.response.defer(ephemeral=True)
+
+        lumina_user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        bday = await Birthday.get_or_none(lumina_user.id, user=user)
+        if bday is None:
+            msg = f"<@{user.id}>"
+            raise DidNotSetBirthdayError(msg)
+
+        embed = bday.get_created_embed(
+            await get_locale(i), timezone=lumina_user.timezone, avatar_url=user.display_avatar.url
+        )
+        await i.followup.send(embed=embed)
 
     async def set_birthday(
         self, i: Interaction, *, month: int, day: int, user: UserOrMember | None = None, name: str | None = None
