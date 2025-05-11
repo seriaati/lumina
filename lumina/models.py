@@ -146,6 +146,23 @@ class Birthday(BaseModel):
             description=LocaleStr("birthday_embed_description", params={"user": self.user_str}),
         )
 
+    def get_display_embed(
+        self, locale: discord.Locale, *, timezone: int, avatar_url: str | None = None
+    ) -> DefaultEmbed:
+        dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
+        embed = DefaultEmbed(
+            locale=locale,
+            title=LocaleStr("birthday_representation_embed_title"),
+            description=LocaleStr(
+                "birthday_representation_embed_description",
+                params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
+            ),
+        )
+        if avatar_url is not None:
+            embed.set_thumbnail(url=avatar_url)
+
+        return embed
+
     @classmethod
     async def get_or_none(
         cls, user_id: int, *, user: UserOrMember | None = None, name: str | None = None
