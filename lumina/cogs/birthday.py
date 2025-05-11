@@ -105,7 +105,10 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(msg)
 
         embed = bday.get_display_embed(
-            await get_locale(i), timezone=lumina_user.timezone, avatar_url=user.display_avatar.url
+            await get_locale(i),
+            display_name=user.global_name or user.name,
+            timezone=lumina_user.timezone,
+            avatar_url=user.display_avatar.url,
         )
         await i.followup.send(embed=embed)
 

@@ -147,12 +147,13 @@ class Birthday(BaseModel):
         )
 
     def get_display_embed(
-        self, locale: discord.Locale, *, timezone: int, avatar_url: str | None = None
+        self, locale: discord.Locale, *, display_name: str, timezone: int, avatar_url: str | None = None
     ) -> DefaultEmbed:
+        user_str = self.bday_username if self.bday_user_id == 0 else display_name
         dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
         embed = DefaultEmbed(
             locale=locale,
-            title=LocaleStr("birthday_representation_embed_title", params={"user": self.user_str}),
+            title=LocaleStr("birthday_representation_embed_title", params={"user": user_str}),
             description=LocaleStr(
                 "birthday_representation_embed_description",
                 params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
