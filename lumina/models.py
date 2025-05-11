@@ -152,7 +152,7 @@ class Birthday(BaseModel):
         dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
         embed = DefaultEmbed(
             locale=locale,
-            title=LocaleStr("birthday_representation_embed_title"),
+            title=LocaleStr("birthday_representation_embed_title", params={"user": self.user_str}),
             description=LocaleStr(
                 "birthday_representation_embed_description",
                 params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
