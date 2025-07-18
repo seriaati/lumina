@@ -1,0 +1,107 @@
+unknown_error: 發生了一個未知錯誤
+birthday_embed_title: "今天是 {user} 的生日！"
+birthday_embed_description: "跟 {user} 說生日快樂"
+birthday_representation_embed_title: "{user} 的生日"
+birthday_representation_embed_description: "{user} 的生日在 {dt}"
+message_reminder_embed_description: "[前往訊息]({message_url})\n於 {created_at} 創建"
+reminder_embed_description: "於 {created_at} 創建"
+birthday_modal_title: 設置生日日期
+birthday_modal_month_label: 月
+birthday_modal_day_label: 日
+invalid_input_title: 無效的輸入
+invalid_input_description: "輸入值 {value} 是無效的，請再試一次。"
+birthday_complete_embed_title: 生日設置成功
+birthday_complete_embed_description: "{user} 的生日已被設置為 {dt}"
+birthday_removed_embed_title: 生日移除成功
+birthday_removed_embed_description: "{user} 的生日已被移除"
+birthday_set_command_description: 設置某人的生日
+birthday_remove_command_description: 移除某人的生日
+set_birthday_ctx_menu_name: 設置生日
+user_parameter_name: 使用者
+day_parameter_name: 日
+month_parameter_name: 月
+did_not_set_birthday_title: 你沒有為這位使用者設置過生日
+did_not_set_birthday_description: "你還沒有為 {user} 設置過生日"
+birthday_list_command_description: 列出所有你設置過的生日
+no_birthdays_title: 沒有設置過生日
+birthday_group_name: 生日
+birthday_set_command_name: 設置
+birthday_remove_command_name: 移除
+birthday_list_command_name: 列表
+settings_saved_embed_title: 設定已儲存
+lang_name: 繁體中文
+lang_param_name: 語言
+timezone_param_name: 時區
+timezone_command_description: 設置你的時區
+language_command_description: 設置機器人回應所使用的語言
+birthday_list_embed_title: 生日
+reminder_group_name: 提醒
+set_reminder_ctx_menu_name: 設置提醒
+reminder_modal_time_label: 提醒我…
+reminder_modal_time_placeholder: 1 小時後/下禮拜三/下午 3 點
+reminder_created_embed_title: 提醒設置成功
+reminder_created_embed_description: "我會在 {dt} 通知你"
+reminder_removed_embed_title: 提醒已移除
+reminder_list_embed_title: 提醒
+reminder_list_command_description: 列出你設置過的所有提醒
+reminder_remove_command_description: 移除一個提醒
+reminder_set_command_description: 設置一個提醒
+when_parameter_name: 時間
+text_parameter_name: 提醒內容
+text_param_description_reminder: 你想要被提醒什麼事情？
+text_param_description_todo: 你等等要做什麼事？
+remove_birthday_ctx_menu_name: 移除生日
+no_reminders_title: 沒有設置任何提醒
+reminder_parameter_name: 提醒
+reminder_not_found_title: 無法找到提醒
+timezone_param_description: 輸入一個 -12 到 14 的數字
+todo_modal_text_label: 我需要…
+todo_modal_text_placeholder: 買牛奶/打電話給媽媽/完成專案
+todo_group_name: 待辦事項
+add_todo_ctx_menu_name: 新增至待辦事項清單
+todo_created_embed_title: 代辦事項已新增
+todo_created_embed_description: "{text} 已新增至你的代辦事項"
+todo_list_embed_title: 代辦事項清單
+paginator_footer: "頁: {page}/{total}"
+todo_add_command_name: 新增
+todo_add_command_description: 新增一個事項到你的代辦事項清單
+todo_done_command_name: 完成
+todo_done_command_description: 將一個代辦事項標記為已完成
+task_parameter_name: 事項
+todo_done_embed_title: 🎉 恭喜！
+todo_done_embed_description: "你已完成：{text}"
+todo_not_found_title: 無法找到此代辦事項
+no_tasks_title: 哇！已經沒有代辦事項了
+todo_list_command_description: 列出你的代辦事項清單裡的所有事項
+yes_text: "是"
+no_text: "否"
+show_done_tasks_parameter_name: 顯示已完成
+show_done_tasks_param_description: 顯示已完成的事項
+todo_remove_command_description: 從代辦事項清單中移除一個事項
+todo_removed_embed_title: 事項已移除
+todo_removed_embed_description: "{text} 已從你的代辦事項中移除"
+no_content: "（無內文）"
+select_month_first: 請先選擇一個月份
+leap_year_notify_embed_title: 你想要被如何通知？
+leap_year_notify_embed_description: 在閏年，二月 29 日不存在
+notify_on_mar_1: 在三月 1 日通知我
+notify_on_feb_28: 在二月 28 日通知我
+dont_notify: 不要通知我
+not_future_time_error: 通知時間必須在未來
+bday_remove_user_param_desc: 想要移除生日的使用者
+bday_set_user_param_desc: 想要設置生日的使用者
+bday_set_month_param_desc: 生日月份
+bday_set_day_param_desc: 生日日期
+reminder_set_when_param_desc: 什麼時候要通知你（例如 1 小時後，十二月 21 日）
+reminder_set_text_param_desc: 要提醒什麼
+reminder_remove_param_desc: 要移除的提醒
+lang_param_desc: 要設置的語言
+timezone_param_desc: 要設置的 UTC 時區（例如 +4、-3）
+todo_add_text_param_desc: 要新增的代辦事項
+task_param_desc: 要標記為已完成的事項
+task_remove_param_desc: 要移除的代辦事項
+name_parameter_name: 名稱
+bday_set_name_param_desc: 使用者的名稱
+bday_invalid_input_error_title: 無效的生日輸入
+bday_invalid_input_error_desc: 你需要提供一個名稱或一個 Discord 使用者，同時提供兩個或都不提供是不可行的
+see_birthday_ctx_menu_name: 查看生日
