@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import pathlib
 from typing import TYPE_CHECKING
 
@@ -85,18 +86,16 @@ class Lumina(commands.Bot):
         await translator.load()
 
     async def _load_cogs(self) -> None:
-        for file_path in pathlib.Path("./lumina/cogs").rglob("*.py"):
-            if file_path.stem == "__init__":
+        for filepath in pathlib.Path("lumina/cogs").glob("**/*.py"):
+            cog_name = pathlib.Path(filepath).stem
+            if os.getenv("ENV", "dev") == "dev" and cog_name == "health":
                 continue
 
-            cog_path = ".".join(file_path.with_suffix("").parts)
             try:
-                await self.load_extension(cog_path)
+                await self.load_extension(f"lumina.cogs.{cog_name}")
+                logger.info(f"Loaded cog {cog_name}")
             except Exception:
-                logger.exception(f"Failed to load cog {cog_path}")
-            else:
-                cog_name = cog_path.split(".")[-1]
-                logger.info(f"Loaded cog {cog_name!r}")
+                logger.exception(f"Failed to load cog {cog_name}")
 
         try:
             await self.load_extension("jishaku")
