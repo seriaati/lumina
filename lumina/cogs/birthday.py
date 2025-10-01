@@ -105,10 +105,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(msg)
 
         embed = bday.get_display_embed(
-            await get_locale(i),
-            display_name=user.global_name or user.name,
-            timezone=lumina_user.timezone,
-            avatar_url=user.display_avatar.url,
+            await get_locale(i), user=user, timezone=lumina_user.timezone, avatar_url=user.display_avatar.url
         )
         await i.followup.send(embed=embed)
 
@@ -131,7 +128,10 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         bday = await Birthday.create_or_update(lumina_user.id, month=month, day=day, user=user, name=name)
         embeds = [
             bday.get_created_embed(
-                locale, timezone=lumina_user.timezone, avatar_url=user.display_avatar.url if user is not None else None
+                locale,
+                timezone=lumina_user.timezone,
+                user=user,
+                avatar_url=user.display_avatar.url if user is not None else None,
             )
         ]
 
@@ -153,7 +153,7 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
             raise DidNotSetBirthdayError(f"<@{user.id}>" if user is not None else name)  # type: ignore[reportArgumentType]
 
         await bday.delete()
-        await i.response.send_message(embed=bday.get_removed_embed(await get_locale(i)), ephemeral=True)
+        await i.response.send_message(embed=bday.get_removed_embed(await get_locale(i), user=user), ephemeral=True)  # pyright: ignore[reportArgumentType]
 
     @app_commands.command(
         name=app_commands.locale_str("set", key="birthday_set_command_name"),

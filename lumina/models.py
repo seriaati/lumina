@@ -73,6 +73,11 @@ class Birthday(BaseModel):
         user_str = f"<@{self.bday_user_id}>" if self.bday_user_id != 0 else self.bday_username
         return "???" if user_str is None else user_str
 
+    def get_user_name(self, user: UserOrMember | None) -> str:
+        if user is None or self.bday_username is not None:
+            return self.bday_username or "???"
+        return f"{user.display_name} ({user.mention})"
+
     @staticmethod
     def get_correct_dt(*, month: int, day: int, timezone: int) -> datetime.datetime:
         now = get_now(timezone)
@@ -95,7 +100,7 @@ class Birthday(BaseModel):
         return discord.utils.format_dt(Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone), "D")
 
     def get_created_embed(
-        self, locale: discord.Locale, *, timezone: int, avatar_url: str | None = None
+        self, locale: discord.Locale, *, timezone: int, user: UserOrMember | None, avatar_url: str | None = None
     ) -> DefaultEmbed:
         dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
         embed = DefaultEmbed(
@@ -103,7 +108,7 @@ class Birthday(BaseModel):
             title=LocaleStr("birthday_complete_embed_title"),
             description=LocaleStr(
                 "birthday_complete_embed_description",
-                params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
+                params={"user": self.get_user_name(user), "dt": discord.utils.format_dt(dt, "D")},
             ),
         )
         if avatar_url is not None:
@@ -111,11 +116,11 @@ class Birthday(BaseModel):
 
         return embed
 
-    def get_removed_embed(self, locale: discord.Locale) -> DefaultEmbed:
+    def get_removed_embed(self, locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_removed_embed_title"),
-            description=LocaleStr("birthday_removed_embed_description", params={"user": self.user_str}),
+            description=LocaleStr("birthday_removed_embed_description", params={"user": self.get_user_name(user)}),
         )
 
     @staticmethod
@@ -139,24 +144,23 @@ class Birthday(BaseModel):
             description=LocaleStr("leap_year_notify_embed_description"),
         )
 
-    def get_embed(self, locale: discord.Locale) -> DefaultEmbed:
+    def get_embed(self, locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
-            title=LocaleStr("birthday_embed_title", params={"user": self.user_str}),
-            description=LocaleStr("birthday_embed_description", params={"user": self.user_str}),
+            title=LocaleStr("birthday_embed_title"),
+            description=LocaleStr("birthday_embed_description", params={"user": self.get_user_name(user)}),
         )
 
     def get_display_embed(
-        self, locale: discord.Locale, *, display_name: str, timezone: int, avatar_url: str | None = None
+        self, locale: discord.Locale, *, user: UserOrMember, timezone: int, avatar_url: str | None = None
     ) -> DefaultEmbed:
-        user_str = self.bday_username if self.bday_user_id == 0 else display_name
         dt = Birthday.get_correct_dt(month=self.month, day=self.day, timezone=timezone)
         embed = DefaultEmbed(
             locale=locale,
-            title=LocaleStr("birthday_representation_embed_title", params={"user": user_str}),
+            title=LocaleStr("birthday_representation_embed_title"),
             description=LocaleStr(
                 "birthday_representation_embed_description",
-                params={"user": self.user_str, "dt": discord.utils.format_dt(dt, "D")},
+                params={"user": self.get_user_name(user), "dt": discord.utils.format_dt(dt, "D")},
             ),
         )
         if avatar_url is not None:
