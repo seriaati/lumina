@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import os
-import pathlib
 from typing import TYPE_CHECKING
 
+import anyio
 import discord
 from discord.ext import commands
 from discord.utils import sleep_until
@@ -73,7 +73,7 @@ class Lumina(commands.Bot):
             allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True),
             help_command=None,
             chunk_guilds_at_startup=False,
-            max_messages=None,
+            max_messages=None,  # pyright: ignore[reportArgumentType]
             member_cache_flags=discord.MemberCacheFlags.none(),
             tree_cls=CommandTree,
         )
@@ -86,8 +86,8 @@ class Lumina(commands.Bot):
         await translator.load()
 
     async def _load_cogs(self) -> None:
-        for filepath in pathlib.Path("lumina/cogs").glob("**/*.py"):
-            cog_name = pathlib.Path(filepath).stem
+        async for filepath in anyio.Path("lumina/cogs").glob("**/*.py"):
+            cog_name = anyio.Path(filepath).stem
             if os.getenv("ENV", "dev") == "dev" and cog_name == "health":
                 continue
 
