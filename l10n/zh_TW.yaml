@@ -1,5 +1,5 @@
 unknown_error: 發生了一個未知錯誤
-birthday_embed_title: "今天有人生日！"
+birthday_embed_title: 今天有人生日！
 birthday_embed_description: "跟 {user} 說生日快樂"
 birthday_representation_embed_title: "生日"
 birthday_representation_embed_description: "{user} 的生日在 {dt}"
