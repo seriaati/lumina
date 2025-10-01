@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  create-release:
+  bump-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,6 +19,3 @@ jobs:
 
       - name: Create release
         uses: seriaati/create-release@main
-        with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
-          tool: "uv"
