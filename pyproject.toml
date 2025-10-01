@@ -2,6 +2,7 @@
 authors = [{email = "seria.ati@gmail.com", name = "seriaati"}]
 dependencies = [
   "aiofiles>=24.1.0",
+  "anyio>=4.11.0",
   "discord-py>=2.4.0",
   "jishaku>=2.5.2",
   "loguru>=0.7.2",
