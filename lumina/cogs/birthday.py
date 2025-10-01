@@ -54,7 +54,7 @@ class NotifyButton(Button[LeapYearNotifyView]):
         await i.response.send_message(embed=embed, ephemeral=True)
 
 
-class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", key="birthday_group_name")):
+class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", key="birthday_group_name")):  # type: ignore
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 

@@ -26,7 +26,7 @@ class ReminderModal(Modal):
     )
 
 
-class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", key="reminder_group_name")):
+class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", key="reminder_group_name")):  # type: ignore
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 

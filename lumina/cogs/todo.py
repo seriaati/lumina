@@ -26,7 +26,7 @@ class TodoModal(Modal):
     )
 
 
-class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_group_name")):
+class TodoCog(commands.GroupCog, name=app_commands.locale_str("todo", key="todo_group_name")):  # type: ignore
     def __init__(self, bot: Lumina) -> None:
         self.bot = bot
 
