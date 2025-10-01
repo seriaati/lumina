@@ -1,7 +1,7 @@
 unknown_error: 發生了一個未知錯誤
-birthday_embed_title: "今天是 {user} 的生日！"
+birthday_embed_title: "今天有人生日！"
 birthday_embed_description: "跟 {user} 說生日快樂"
-birthday_representation_embed_title: "{user} 的生日"
+birthday_representation_embed_title: "生日"
 birthday_representation_embed_description: "{user} 的生日在 {dt}"
 message_reminder_embed_description: "[前往訊息]({message_url})\n於 {created_at} 創建"
 reminder_embed_description: "於 {created_at} 創建"

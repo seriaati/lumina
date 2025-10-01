@@ -1,7 +1,7 @@
 unknown_error: An unknown error occurred
 birthday_embed_title: Today is someone's birthday!
 birthday_embed_description: Say happy birthday to {user}
-birthday_representation_embed_title: "{user}'s birthday"
+birthday_representation_embed_title: "Birthday"
 birthday_representation_embed_description: "{user}'s birthday is on {dt}"
 message_reminder_embed_description: "[Go to message]({message_url})\nCreated at {created_at}"
 reminder_embed_description: "Created at {created_at}"
