@@ -4,13 +4,12 @@ import calendar
 import datetime
 from typing import TYPE_CHECKING, Any
 
-from lumina.models import Birthday
-
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     import discord
 
+    from lumina.models import Birthday
     from lumina.types import Interaction
 
 
