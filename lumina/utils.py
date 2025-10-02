@@ -4,6 +4,8 @@ import calendar
 import datetime
 from typing import TYPE_CHECKING, Any
 
+from lumina.models import Birthday
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -75,3 +77,14 @@ def next_leap_year() -> int:
     while not calendar.isleap(year):
         year += 1
     return year
+
+
+def next_birthday_delta(month: int, day: int, now: datetime.datetime) -> int:
+    birthday_this_year = datetime.date(now.year, month, day)
+    birthday_next = datetime.date(now.year + 1, month, day) if birthday_this_year < now.date() else birthday_this_year
+    return (birthday_next - now.date()).days
+
+
+def sort_birthdays_by_next(birthdays: list[Birthday], now: datetime.datetime) -> list[Birthday]:
+    birthdays.sort(key=lambda b: next_birthday_delta(b.month, b.day, now))
+    return birthdays

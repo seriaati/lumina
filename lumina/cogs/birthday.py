@@ -10,9 +10,9 @@ from discord.ext import commands
 from lumina.components import Button, Modal, Paginator, TextInput, View
 from lumina.exceptions import DidNotSetBirthdayError, InvalidBirthdayInputError, InvalidInputError, NoBirthdaysError
 from lumina.l10n import LocaleStr, translator
-from lumina.models import Birthday, LuminaUser, get_locale
+from lumina.models import Birthday, LuminaUser, get_locale, get_timezone
 from lumina.types import UserOrMember  # noqa: TC001
-from lumina.utils import absolute_send
+from lumina.utils import absolute_send, get_now, sort_birthdays_by_next
 
 if TYPE_CHECKING:
     from lumina.bot import Lumina
@@ -232,10 +232,12 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
     async def birthday_list(self, i: Interaction) -> None:
         await i.response.defer(ephemeral=True)
 
-        user, _ = await LuminaUser.get_or_create(id=i.user.id)
-        birthdays = await Birthday.filter(user=user).order_by("month", "day")
+        birthdays = await Birthday.filter(user_id=i.user.id)
         if not birthdays:
             raise NoBirthdaysError
+
+        now = get_now(await get_timezone(i.user.id))
+        birthdays = sort_birthdays_by_next(birthdays, now)
 
         split_birthdays = itertools.batched(birthdays, 10)
         timezone = (await LuminaUser.get_or_create(id=i.user.id))[0].timezone
