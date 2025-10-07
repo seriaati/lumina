@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import pathlib
 from typing import Any
 
 import aiofiles
+import anyio
 import discord
 import yaml
 
@@ -20,7 +20,7 @@ class Translator:
 
     async def load(self) -> None:
         """Load all translations from the l10n directory."""
-        for file_path in pathlib.Path("./l10n").rglob("*.yaml"):
+        async for file_path in anyio.Path("./l10n").rglob("*.yaml"):
             async with aiofiles.open(file_path, encoding="utf-8") as file:
                 data: dict[str, str] = yaml.safe_load(await file.read())
 
