@@ -105,3 +105,9 @@ bday_set_name_param_desc: The name of the user
 bday_invalid_input_error_title: Invalid Birthday Input
 bday_invalid_input_error_desc: You need to provide either a name or a Discord user, providing both or neither is not allowed
 see_birthday_ctx_menu_name: See birthday
+notify_days_before_parameter_name: notify-days-before
+bday_set_notify_days_before_param_desc: Days before birthday to send early notification (optional)
+birthday_early_notify_set_embed_title: Early Notification Set
+birthday_early_notify_set_embed_description: You will be notified {days} days before {user}'s birthday
+birthday_early_notification_embed_title: Upcoming Birthday!
+birthday_early_notification_embed_description: "{user}'s birthday is in {days} days!"

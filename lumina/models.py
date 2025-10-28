@@ -67,6 +67,10 @@ class Birthday(BaseModel):
     leap_year_notify_month: fields.Field[int | None] = fields.IntField(null=True)
     leap_year_notify_day: fields.Field[int | None] = fields.IntField(null=True)
     last_notify_year = fields.IntField(default=0)
+    notify_days_before: fields.Field[int | None] = fields.IntField(null=True)
+    """How many days before the birthday to send an early notification (in addition to the day-of notification)."""
+    last_early_notify_year = fields.IntField(default=0)
+    """Track the year we last sent the early notification to avoid duplicates."""
 
     @property
     def user_str(self) -> str:
@@ -144,11 +148,23 @@ class Birthday(BaseModel):
             description=LocaleStr("leap_year_notify_embed_description"),
         )
 
-    def get_embed(self, locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
+    def get_embed(self, locale: discord.Locale, *, user: UserOrMember | None) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_embed_title"),
             description=LocaleStr("birthday_embed_description", params={"user": self.get_user_name(user)}),
+        )
+
+    def get_early_notification_embed(
+        self, locale: discord.Locale, *, user: UserOrMember | None, days_before: int
+    ) -> DefaultEmbed:
+        return DefaultEmbed(
+            locale=locale,
+            title=LocaleStr("birthday_early_notification_embed_title"),
+            description=LocaleStr(
+                "birthday_early_notification_embed_description",
+                params={"user": self.get_user_name(user), "days": str(days_before)},
+            ),
         )
 
     def get_display_embed(
