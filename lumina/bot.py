@@ -20,6 +20,11 @@ from lumina.models import Reminder
 if TYPE_CHECKING:
     from lumina.embeds import ErrorEmbed
 
+TORTOISE_CONFIG = {
+    "connections": {"default": "sqlite://lumina.db"},
+    "apps": {"models": {"models": ["lumina.models", "aerich.models"], "default_connection": "default", "use_tz": True}},
+}
+
 
 class ReminderScheduler:
     def __init__(self, bot: Lumina) -> None:
@@ -79,7 +84,7 @@ class Lumina(commands.Bot):
         )
 
     async def _setup_database(self) -> None:
-        await Tortoise.init(db_url="sqlite://lumina.db", modules={"models": ["lumina.models"]}, use_tz=True)
+        await Tortoise.init(config=TORTOISE_CONFIG)
         await Tortoise.generate_schemas()
 
     async def _setup_translator(self) -> None:
