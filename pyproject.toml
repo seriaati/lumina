@@ -1,6 +1,7 @@
 [project]
 authors = [{email = "seria.ati@gmail.com", name = "seriaati"}]
 dependencies = [
+  "aerich[toml]>=0.9.2",
   "aiofiles>=24.1.0",
   "anyio>=4.11.0",
   "discord-py>=2.4.0",
@@ -24,3 +25,8 @@ reportIncompatibleVariableOverride = false
 typeCheckingMode = "standard"
 venv = ".venv"
 venvPath = "."
+
+[tool.aerich]
+tortoise_orm = "lumina.bot.TORTOISE_CONFIG"
+location = "./migrations"
+src_folder = "./."
