@@ -148,7 +148,7 @@ class Birthday(BaseModel):
             description=LocaleStr("leap_year_notify_embed_description"),
         )
 
-    def get_embed(self, locale: discord.Locale, *, user: UserOrMember) -> DefaultEmbed:
+    def get_embed(self, locale: discord.Locale, *, user: UserOrMember | None) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,
             title=LocaleStr("birthday_embed_title"),
@@ -156,7 +156,7 @@ class Birthday(BaseModel):
         )
 
     def get_early_notification_embed(
-        self, locale: discord.Locale, *, user: UserOrMember, days_before: int
+        self, locale: discord.Locale, *, user: UserOrMember | None, days_before: int
     ) -> DefaultEmbed:
         return DefaultEmbed(
             locale=locale,

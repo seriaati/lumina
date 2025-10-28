@@ -282,7 +282,6 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         view = Paginator(embeds, locale=locale)
         await view.start(i)
 
-    @birthday_set.autocomplete("name")
     @birthday_remove.autocomplete("name")
     async def bday_name_autocomplete(self, i: Interaction, current: str) -> list[app_commands.Choice[str]]:
         bdays = await Birthday.filter(

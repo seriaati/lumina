@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import calendar
+import contextlib
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands, tasks
 from loguru import logger
 
@@ -13,6 +15,7 @@ from lumina.utils import get_now
 
 if TYPE_CHECKING:
     from lumina.bot import Lumina
+    from lumina.types import UserOrMember
 
 
 class ScheduleCog(commands.Cog):
@@ -25,11 +28,20 @@ class ScheduleCog(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_birthdays.cancel()
 
+    async def _get_bday_user(self, birthday: Birthday) -> UserOrMember | None:
+        bday_user: UserOrMember | None = None
+        if birthday.bday_user_id != 0:
+            with contextlib.suppress(discord.NotFound):
+                bday_user = self.bot.get_user(birthday.bday_user_id) or await self.bot.fetch_user(birthday.bday_user_id)
+        return bday_user
+
     async def _send_regular_notification(self, birthday: Birthday) -> None:
         """Send a regular birthday notification on the day of the birthday."""
         logger.info(f"Sending birthday reminder to {birthday.user_id}")
         await birthday.fetch_related("user")
-        bday_user = self.bot.get_user(birthday.bday_user_id) or await self.bot.fetch_user(birthday.bday_user_id)
+
+        bday_user = await self._get_bday_user(birthday)
+
         embed = birthday.get_embed(birthday.user.locale or DEFAULT_LOCALE, user=bday_user)
         success = await self.bot.dm_user(birthday.user_id, embed=embed)
         if success:
@@ -41,7 +53,9 @@ class ScheduleCog(commands.Cog):
         """Send an early birthday notification X days before the birthday."""
         logger.info(f"Sending early birthday reminder to {birthday.user_id} ({days_before} days before)")
         await birthday.fetch_related("user")
-        bday_user = self.bot.get_user(birthday.bday_user_id) or await self.bot.fetch_user(birthday.bday_user_id)
+
+        bday_user = await self._get_bday_user(birthday)
+
         embed = birthday.get_early_notification_embed(
             birthday.user.locale or DEFAULT_LOCALE, user=bday_user, days_before=days_before
         )
