@@ -46,6 +46,7 @@ ignore = ["PLR0913", "ANN401", "PLR6301", "UP046"]
 [lint.per-file-ignores]
 "**/__init__.py" = ["F403", "F401"]
 "test.py" = ["ALL"]
+"migrations/**" = ["ALL"]
 
 [lint.flake8-type-checking]
 quote-annotations = true
