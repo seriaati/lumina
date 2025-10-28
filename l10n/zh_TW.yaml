@@ -108,6 +108,6 @@ see_birthday_ctx_menu_name: 查看生日
 notify_days_before_parameter_name: 提前通知天數
 bday_set_notify_days_before_param_desc: 生日前幾天發送提前通知（選填）
 birthday_early_notify_set_embed_title: 提前通知設置成功
-birthday_early_notify_set_embed_description: 你會在 {user} 的生日前 {days} 天收到通知
+birthday_early_notify_set_embed_description: "你會在 {user} 的生日前 {days} 天收到通知"
 birthday_early_notification_embed_title: 即將到來的生日！
 birthday_early_notification_embed_description: "{user} 的生日還有 {days} 天！"
