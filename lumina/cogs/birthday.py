@@ -8,6 +8,7 @@ from discord import ButtonStyle, Locale, app_commands
 from discord.ext import commands
 
 from lumina.components import Button, Modal, Paginator, TextInput, View
+from lumina.embeds import DefaultEmbed
 from lumina.exceptions import DidNotSetBirthdayError, InvalidBirthdayInputError, InvalidInputError, NoBirthdaysError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale, get_timezone
@@ -16,7 +17,6 @@ from lumina.utils import absolute_send, get_now, sort_birthdays_by_next
 
 if TYPE_CHECKING:
     from lumina.bot import Lumina
-    from lumina.embeds import DefaultEmbed
     from lumina.types import Interaction
 
 FEBRUARY = 2
@@ -110,7 +110,14 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         await i.followup.send(embed=embed)
 
     async def set_birthday(
-        self, i: Interaction, *, month: int, day: int, user: UserOrMember | None = None, name: str | None = None
+        self,
+        i: Interaction,
+        *,
+        month: int,
+        day: int,
+        user: UserOrMember | None = None,
+        name: str | None = None,
+        notify_days_before: int | None = None,
     ) -> None:
         if (user is None and name is None) or (user is not None and name is not None):
             raise InvalidBirthdayInputError
@@ -126,6 +133,12 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         locale = await get_locale(i)
 
         bday = await Birthday.create_or_update(lumina_user.id, month=month, day=day, user=user, name=name)
+
+        # Set early notification if specified
+        if notify_days_before is not None:
+            bday.notify_days_before = notify_days_before if notify_days_before > 0 else None
+            await bday.save(update_fields=("notify_days_before",))
+
         embeds = [
             bday.get_created_embed(
                 locale,
@@ -134,6 +147,19 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
                 avatar_url=user.display_avatar.url if user is not None else None,
             )
         ]
+
+        # Add early notification info to embed if set
+        if notify_days_before is not None and notify_days_before > 0:
+            embeds.append(
+                DefaultEmbed(
+                    locale=locale,
+                    title=LocaleStr("birthday_early_notify_set_embed_title"),
+                    description=LocaleStr(
+                        "birthday_early_notify_set_embed_description",
+                        params={"user": bday.get_user_name(user), "days": str(notify_days_before)},
+                    ),
+                )
+            )
 
         if (month, day) == (2, 29):
             embeds.append(Birthday.get_leap_year_notify_embed(locale))
@@ -164,23 +190,29 @@ class BirthdayCog(commands.GroupCog, name=app_commands.locale_str("birthday", ke
         day=app_commands.locale_str("day", key="day_parameter_name"),
         user=app_commands.locale_str("user", key="user_parameter_name"),
         name=app_commands.locale_str("name", key="name_parameter_name"),
+        notify_days_before=app_commands.locale_str("notify-days-before", key="notify_days_before_parameter_name"),
     )
     @app_commands.describe(
         user=app_commands.locale_str("The user whose birthday you want to set", key="bday_set_user_param_desc"),
         month=app_commands.locale_str("The month of the birthday", key="bday_set_month_param_desc"),
         day=app_commands.locale_str("The day of the birthday", key="bday_set_day_param_desc"),
         name=app_commands.locale_str("The name of the user", key="bday_set_name_param_desc"),
+        notify_days_before=app_commands.locale_str(
+            "Days before birthday to send early notification (optional)", key="bday_set_notify_days_before_param_desc"
+        ),
     )
     async def birthday_set(
         self,
         i: Interaction,
         month: app_commands.Range[int, 1, 12],
         day: app_commands.Range[int, 1, 31],
+        *,
         user: UserOrMember | None = None,
         name: str | None = None,
+        notify_days_before: app_commands.Range[int, 1, 365] | None = None,
     ) -> None:
         await i.response.defer(ephemeral=True)
-        await self.set_birthday(i, month=month, day=day, user=user, name=name)
+        await self.set_birthday(i, month=month, day=day, user=user, name=name, notify_days_before=notify_days_before)
 
     @birthday_set.autocomplete("month")
     async def month_autocomplete(self, _: Interaction, current: str) -> list[app_commands.Choice[int]]:
