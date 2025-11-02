@@ -4,7 +4,7 @@ import datetime
 from typing import TYPE_CHECKING, Any
 
 import discord
-import parsedatetime
+from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
 
@@ -36,9 +36,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
 
     @staticmethod
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
-        cal = parsedatetime.Calendar()
-        time_struct, _ = cal.parse(time, get_now(timezone))
-        dt = datetime.datetime(*time_struct[:6], tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+        dt = parser.parse(time)
+        dt = dt.replace(tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
         if dt < get_now(timezone):
             raise NotFutureTimeError
         return dt
