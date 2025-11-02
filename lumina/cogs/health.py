@@ -28,8 +28,14 @@ class HealthCheck(commands.Cog):
             logger.warning("No heartbeat URL configured, skipping health check.")
             return
 
-        async with aiohttp.ClientSession() as session:
-            await session.get(url)
+        timeout = aiohttp.ClientTimeout(total=10)
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session, session.get(url) as resp:
+                _ = await resp.read()
+        except aiohttp.ClientError as e:
+            logger.warning(f"Heartbeat request failed: {e}")
+        except Exception:
+            logger.exception("Unexpected error while sending heartbeat")
 
     @send_heartbeat.before_loop
     async def before_send_heartbeat(self) -> None:
