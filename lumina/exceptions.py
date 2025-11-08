@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+import discord
+
 from lumina.l10n import LocaleStr
+
+if TYPE_CHECKING:
+    import datetime
 
 
 class LuminaError(Exception):
-    def __init__(self, title: LocaleStr, description: LocaleStr | None = None) -> None:
+    def __init__(self, title: LocaleStr | str, description: LocaleStr | str | None = None) -> None:
         self.title = title
         self.description = description
 
@@ -50,8 +57,8 @@ class NoTasksError(LuminaError):
 
 
 class NotFutureTimeError(LuminaError):
-    def __init__(self) -> None:
-        super().__init__(LocaleStr("not_future_time_error"))
+    def __init__(self, parsed: datetime.datetime) -> None:
+        super().__init__(LocaleStr("not_future_time_error"), discord.utils.format_dt(parsed, "F"))
 
 
 class InvalidBirthdayInputError(LuminaError):

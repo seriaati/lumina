@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING, Any
 
+import dateparser
 import discord
-from dateutil import parser
 from discord import app_commands
 from discord.ext import commands
 
 from lumina.components import Modal, Paginator, TextInput
-from lumina.exceptions import NoRemindersError, NotFutureTimeError, ReminderNotFoundError
+from lumina.exceptions import InvalidInputError, NoRemindersError, NotFutureTimeError, ReminderNotFoundError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import LuminaUser, Reminder, get_locale, get_timezone
 from lumina.utils import get_now, shorten_text, split_list_to_chunks
 
 if TYPE_CHECKING:
+    import datetime
+
     from lumina.bot import Lumina
     from lumina.embeds import DefaultEmbed
     from lumina.types import Interaction
@@ -36,10 +37,11 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
 
     @staticmethod
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
-        dt = parser.parse(time)
-        dt = dt.replace(tzinfo=datetime.timezone(datetime.timedelta(hours=timezone)))
+        dt = dateparser.parse(time, settings={"TIMEZONE": f"UTC{timezone:+03d}:00", "RETURN_AS_TIMEZONE_AWARE": True})
+        if dt is None:
+            raise InvalidInputError(time)
         if dt < get_now(timezone):
-            raise NotFutureTimeError
+            raise NotFutureTimeError(dt)
         return dt
 
     async def cog_load(self) -> None:
