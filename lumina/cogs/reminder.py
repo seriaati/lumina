@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 import dateparser
@@ -36,7 +37,15 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
         )
 
     @staticmethod
+    def match_hours_pattern(text: str) -> re.Match | None:
+        """Returns match object if text matches pattern like '1h', '2h', etc."""
+        return re.match(r"^\d+h$", text)
+
+    @staticmethod
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
+        if ReminderCog.match_hours_pattern(time):
+            time = f"in {time}"
+
         dt = dateparser.parse(time, settings={"TIMEZONE": f"UTC{timezone:+03d}:00", "RETURN_AS_TIMEZONE_AWARE": True})
         if dt is None:
             raise InvalidInputError(time)
