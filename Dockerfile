@@ -33,7 +33,8 @@ FROM python:3.12-slim-bookworm
 
 # Set production environment
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    DB_PATH=/app/data/lumina.db
 
 # Create non-root user for security
 RUN groupadd --system --gid 999 lumina \
@@ -46,13 +47,17 @@ COPY --from=builder --chown=lumina:lumina /app /app
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Create required directories with proper permissions
-RUN mkdir -p /app/logs && chown -R lumina:lumina /app/logs
+RUN mkdir -p /app/logs /app/data && chown -R lumina:lumina /app/logs /app/data
 
 # Switch to non-root user
 USER lumina
 
 # Set working directory
 WORKDIR /app
+
+# Declare volumes for persistent data
+# Database and logs should be mounted to persist across container restarts
+VOLUME ["/app/data", "/app/logs"]
 
 # Health check (optional - adjust port if you add a health endpoint)
 # HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

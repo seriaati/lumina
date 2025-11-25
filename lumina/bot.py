@@ -20,8 +20,11 @@ from lumina.models import Reminder
 if TYPE_CHECKING:
     from lumina.embeds import ErrorEmbed
 
+# Use /app/data/lumina.db in containers, lumina.db locally
+DB_PATH = os.getenv("DB_PATH", "lumina.db")
+
 TORTOISE_CONFIG = {
-    "connections": {"default": "sqlite://lumina.db"},
+    "connections": {"default": f"sqlite://{DB_PATH}"},
     "apps": {"models": {"models": ["lumina.models", "aerich.models"], "default_connection": "default", "use_tz": True}},
 }
 
