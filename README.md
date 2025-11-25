@@ -55,12 +55,152 @@ If GitHub is not your type, you can find me on [Discord](https://discord.com/inv
 
 ## Self Hosting
 
-1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
-1. Clone the repository
-1. Create a `.env` file:
+Lumina can be self-hosted using several methods. All methods require a Discord bot token, which you can obtain from the [Discord Developer Portal](https://discord.com/developers/applications).
+
+### Prerequisites
+
+- A Discord bot token
+
+### Method 1: Docker
+
+1. Pull the latest image:
+
+   ```bash
+   docker pull ghcr.io/seriaati/lumina:latest
+   ```
+
+2. Run the container:
+
+   ```bash
+   docker run -d \
+     --name lumina \
+     -e DISCORD_TOKEN=YourDiscordBotToken \
+     -v lumina-data:/app/data \
+     -v lumina-logs:/app/logs \
+     --restart unless-stopped \
+     ghcr.io/seriaati/lumina:latest
+   ```
+
+   **Note:** The `-v` flags create Docker volumes to persist your database and logs across container restarts.
+
+### Method 2: Docker Compose
+
+1. Create a `docker-compose.yml` file:
+
+   ```yaml
+   services:
+     lumina:
+       image: ghcr.io/seriaati/lumina:latest
+       container_name: lumina
+       restart: unless-stopped
+       environment:
+         - DISCORD_TOKEN=${DISCORD_TOKEN}
+       volumes:
+         - ./data:/app/data
+         - ./logs:/app/logs
+       healthcheck:
+         test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+         interval: 30s
+         timeout: 10s
+         retries: 3
+         start_period: 5s
+   ```
+
+2. Create a `.env` file in the same directory:
 
    ```env
    DISCORD_TOKEN=YourDiscordBotToken
    ```
 
-1. `uv run run.py`
+3. Start the service:
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. View logs:
+
+   ```bash
+   docker compose logs -f lumina
+   ```
+
+5. Stop the service:
+
+   ```bash
+   docker compose down
+   ```
+
+### Method 3: PM2 (Linux/macOS)
+
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and [PM2](https://pm2.keymetrics.io/):
+
+   ```bash
+   curl -sSf https://astral.sh/uv/install.sh | sh
+   npm install -g pm2
+   ```
+
+2. Clone the repository:
+
+   ```bash
+   git clone https://github.com/seriaati/lumina.git
+   cd lumina
+   ```
+
+3. Create a `.env` file:
+
+   ```env
+   DISCORD_TOKEN=YourDiscordBotToken
+   ```
+
+4. Install dependencies:
+
+   ```bash
+   uv sync --frozen
+   ```
+
+5. Start with PM2:
+
+   ```bash
+   pm2 start pm2.json
+   ```
+
+### Method 4: Manual (Development/Testing)
+
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+2. Clone the repository:
+
+   ```bash
+   git clone https://github.com/seriaati/lumina.git
+   cd lumina
+   ```
+
+3. Create a `.env` file:
+
+   ```env
+   DISCORD_TOKEN=YourDiscordBotToken
+   ```
+
+4. Run the bot:
+
+   ```bash
+   uv run run.py
+   ```
+
+   This will automatically create a virtual environment and install dependencies on first run.
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DISCORD_TOKEN` | Yes | - | Your Discord bot token |
+| `DB_PATH` | No | `lumina.db` | Path to SQLite database file (Docker: `/app/data/lumina.db`) |
+
+### Data Persistence
+
+- **Database**: Lumina uses SQLite to store reminders, birthdays, todos, and notes
+  - Docker: `/app/data/lumina.db`
+  - Manual/PM2: `lumina.db` in the project root
+- **Logs**: Application logs are stored in the `logs/` directory
+  - Docker: `/app/logs/lumina.log`
+  - Manual/PM2: `logs/lumina.log`
