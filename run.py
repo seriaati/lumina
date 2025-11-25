@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from lumina.bot import Lumina
+from lumina.health import HealthCheckServer
 from lumina.logging import InterceptHandler
 
 
@@ -23,7 +24,7 @@ def setup_logger() -> None:
 
 
 async def main() -> None:
-    async with Lumina() as bot:
+    async with Lumina() as bot, HealthCheckServer(bot):
         await bot.start(os.environ["DISCORD_TOKEN"])
 
 
