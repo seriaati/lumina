@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
 # Final runtime stage: Minimal image without uv
-FROM python:3.12-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 # Set production environment
 ENV PYTHONUNBUFFERED=1 \
