@@ -76,6 +76,7 @@ jobs:
           push-to-registry: true
 
       - name: Trigger deployment webhook
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_SHA: ${{ github.sha }}
