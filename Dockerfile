@@ -40,21 +40,11 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for security
-RUN groupadd --system --gid 999 lumina \
-    && useradd --system --gid 999 --uid 999 --create-home lumina
-
 # Copy the application and virtual environment from builder
-COPY --from=builder --chown=lumina:lumina /app /app
+COPY --from=builder --chown=app:app /app /app
 
 # Place virtual environment executables at the front of PATH
 ENV PATH="/app/.venv/bin:$PATH"
-
-# Create required directories with proper permissions
-RUN mkdir -p /app/logs /app/data && chown -R lumina:lumina /app/logs /app/data
-
-# Switch to non-root user
-USER lumina
 
 # Set working directory
 WORKDIR /app
