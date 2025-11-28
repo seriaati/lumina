@@ -38,8 +38,8 @@ class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", ke
 
     @staticmethod
     def match_hours_pattern(text: str) -> re.Match | None:
-        """Returns match object if text matches pattern like '1h', '2h', etc."""
-        return re.match(r"^\d+h$", text)
+        """Returns match object if text matches patterns like '1h', '2h', '1 hour', '2 hours', '1hr', '2 horu', etc."""
+        return re.match(r"^\s*\d+\s*(?:h|hr|hrs|hour|hours)\s*$", text, flags=re.IGNORECASE)
 
     @staticmethod
     def natural_language_to_dt(time: str, timezone: int) -> datetime.datetime:
