@@ -24,4 +24,10 @@ def create_error_embed(error: Exception, *, locale: discord.Locale) -> tuple[Err
     if isinstance(error, LuminaError):
         return ErrorEmbed(locale, title=error.title, description=error.description), True
 
-    return ErrorEmbed(locale, title=LocaleStr("unknown_error"), description=f"{type(error).__name__}: {error}"), False
+    return ErrorEmbed(
+        locale,
+        title=LocaleStr("unknown_error"),
+        description=LocaleStr(
+            "unknown_error_description", params={"developer_contact": "<discord://-/users/410036441129943050>"}
+        ),
+    ), False

@@ -1,4 +1,5 @@
 unknown_error: An unknown error occurred
+unknown_error_description: Please inform the [bot developer]({developer_contact}) about this issue.
 birthday_embed_title: Today is someone's birthday!
 birthday_embed_description: Say happy birthday to {user}
 birthday_representation_embed_title: "Birthday"
