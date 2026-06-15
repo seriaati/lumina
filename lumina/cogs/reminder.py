@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from lumina.components import Modal, Paginator, TextInput
+from lumina.components import Button, Modal, Paginator, TextInput, View
 from lumina.exceptions import InvalidInputError, NoRemindersError, NotFutureTimeError, ReminderNotFoundError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import LuminaUser, Reminder, get_locale, get_timezone
@@ -26,6 +26,43 @@ class ReminderModal(Modal):
     time = TextInput(
         label=LocaleStr("reminder_modal_time_label"), placeholder=LocaleStr("reminder_modal_time_placeholder")
     )
+
+
+class SnoozeButton(Button["SnoozeView"]):
+    def __init__(self) -> None:
+        super().__init__(label=LocaleStr("reminder_snooze_button_label"), style=discord.ButtonStyle.blurple)
+
+    async def callback(self, i: Interaction) -> Any:
+        locale = await get_locale(i)
+
+        modal = ReminderModal(title=LocaleStr("reminder_snooze_modal_title"))
+        modal.translate(locale)
+
+        await i.response.send_modal(modal)
+        await modal.wait()
+        if modal.incomplete:
+            return
+
+        timezone = await get_timezone(i.user.id)
+        dt = ReminderCog.natural_language_to_dt(modal.time.value, timezone)
+
+        user, _ = await LuminaUser.get_or_create(id=i.user.id)
+        reminder = await Reminder.create(text=self.view.text, datetime=dt, user=user, message_url=self.view.message_url)
+        await i.client.scheduler.schedule_reminder()
+
+        self.disabled = True
+        if self.view.message is not None:
+            await self.view.message.edit(view=self.view)
+
+        await i.followup.send(embed=reminder.get_created_embed(locale), ephemeral=True)
+
+
+class SnoozeView(View):
+    def __init__(self, *, text: str, message_url: str | None, locale: discord.Locale) -> None:
+        super().__init__(locale, timeout=300)
+        self.text = text
+        self.message_url = message_url
+        self.add_item(SnoozeButton())
 
 
 class ReminderCog(commands.GroupCog, name=app_commands.locale_str("reminder", key="reminder_group_name")):  # type: ignore

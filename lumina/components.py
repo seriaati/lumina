@@ -21,12 +21,12 @@ V_co = TypeVar("V_co", bound="View", covariant=True)
 
 
 class View(discord.ui.View):
-    def __init__(self, locale: discord.Locale) -> None:
+    def __init__(self, locale: discord.Locale, *, timeout: float | None = 180) -> None:
         self.translator = translator
         self.locale = locale
         self.message: discord.Message | None = None
 
-        super().__init__()
+        super().__init__(timeout=timeout)
 
     def disable_items(self) -> None:
         for item in self.children:

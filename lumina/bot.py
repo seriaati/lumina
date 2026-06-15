@@ -11,6 +11,7 @@ from discord.utils import sleep_until
 from loguru import logger
 from tortoise import Tortoise
 
+from lumina.cogs.reminder import SnoozeView
 from lumina.command_tree import CommandTree
 from lumina.constants import DEFAULT_LOCALE
 from lumina.error_handler import create_error_embed
@@ -36,9 +37,12 @@ class ReminderScheduler:
 
     async def send_reminder(self, reminder: Reminder) -> None:
         logger.info(f"Sending reminder to {reminder.user_id}")
-        embed = reminder.get_embed(reminder.user.locale or DEFAULT_LOCALE)
-        success = await self.bot.dm_user(reminder.user_id, embed=embed)
-        if success:
+        locale = reminder.user.locale or DEFAULT_LOCALE
+        embed = reminder.get_embed(locale)
+        view = SnoozeView(text=reminder.text, message_url=reminder.message_url, locale=locale)
+        message = await self.bot.dm_user(reminder.user_id, embed=embed, view=view)
+        if message is not None:
+            view.message = message
             await reminder.delete()
         else:
             reminder.sent = True
@@ -123,20 +127,20 @@ class Lumina(commands.Bot):
     def create_error_embed(self, error: Exception, *, locale: discord.Locale) -> tuple[ErrorEmbed, bool]:
         return create_error_embed(error, locale=locale)
 
-    async def dm_user(self, user_id: int, *, embed: discord.Embed) -> bool:
+    async def dm_user(
+        self, user_id: int, *, embed: discord.Embed, view: discord.ui.View | None = None
+    ) -> discord.Message | None:
         try:
             user = await self.fetch_user(user_id)
         except discord.NotFound:
             logger.warning(f"Could not find user with ID {user_id}.")
-            return False
+            return None
 
         try:
-            await user.send(embed=embed)
+            return await user.send(embed=embed, view=view) if view is not None else await user.send(embed=embed)
         except discord.Forbidden:
             logger.warning(f"Could not DM {user}.")
-            return False
-
-        return True
+            return None
 
     async def close(self) -> None:
         await Tortoise.close_connections()

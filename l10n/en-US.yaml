@@ -40,6 +40,8 @@ reminder_group_name: reminder
 set_reminder_ctx_menu_name: Set reminder
 reminder_modal_time_label: Remind me...
 reminder_modal_time_placeholder: in 1 hour/next Wednesday/at 3pm
+reminder_snooze_button_label: Snooze
+reminder_snooze_modal_title: Snooze Reminder
 reminder_created_embed_title: Reminder Created
 reminder_created_embed_description: I will remind you {dt}
 reminder_removed_embed_title: Reminder Removed

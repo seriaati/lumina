@@ -39,6 +39,8 @@ reminder_group_name: 提醒
 set_reminder_ctx_menu_name: 設置提醒
 reminder_modal_time_label: 提醒我…
 reminder_modal_time_placeholder: 1 小時後/下禮拜三/下午 3 點
+reminder_snooze_button_label: 延後
+reminder_snooze_modal_title: 延後提醒
 reminder_created_embed_title: 提醒設置成功
 reminder_created_embed_description: "我會在 {dt} 通知你"
 reminder_removed_embed_title: 提醒已移除
