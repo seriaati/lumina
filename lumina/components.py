@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Self, TypeVar
 
 import discord
-from discord.ui.item import Item
 from loguru import logger
 
 from lumina.exceptions import InvalidInputError
