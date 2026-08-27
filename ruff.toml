@@ -41,10 +41,10 @@ select = [
   "FURB",
   "RUF",
 ]
-ignore = ["PLR0913", "ANN401", "PLR6301", "UP046"]
+ignore = ["too-many-arguments", "any-type", "no-self-use", "non-pep695-generic-class"]
 
 [lint.per-file-ignores]
-"**/__init__.py" = ["F403", "F401"]
+"**/__init__.py" = ["undefined-local-with-import-star", "unused-import"]
 "test.py" = ["ALL"]
 "migrations/**" = ["ALL"]
 
