@@ -276,7 +276,7 @@ class TodoTask(BaseModel):
         await self.save(update_fields=("done",))
 
     class Meta:
-        ordering = ["-created_at"]  # noqa: RUF012
+        ordering = ["-created_at"]  # ruff: ignore[mutable-class-default]
 
     def get_created_embed(self, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(
@@ -325,7 +325,7 @@ class Notes(BaseModel):
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_at"]  # noqa: RUF012
+        ordering = ["-created_at"]  # ruff: ignore[mutable-class-default]
 
     def get_created_embed(self, locale: discord.Locale) -> DefaultEmbed:
         return DefaultEmbed(

@@ -120,7 +120,7 @@ class ScheduleCog(commands.Cog):
             return True
         return (birthday.leap_year_notify_month, birthday.leap_year_notify_day) == (now_month, now_day)
 
-    def _calculate_target_birthday(self, birthday: Birthday, now):  # noqa: ANN001, ANN202
+    def _calculate_target_birthday(self, birthday: Birthday, now):  # ruff: ignore[missing-type-function-argument, missing-return-type-private-function]
         """Calculate the target birthday date for the current or next year. Returns datetime or None."""
         try:
             target_date = now.replace(month=birthday.month, day=birthday.day)

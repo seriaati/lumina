@@ -12,7 +12,7 @@ from lumina.embeds import DefaultEmbed
 from lumina.exceptions import DidNotSetBirthdayError, InvalidBirthdayInputError, InvalidInputError, NoBirthdaysError
 from lumina.l10n import LocaleStr, translator
 from lumina.models import Birthday, LuminaUser, get_locale, get_timezone
-from lumina.types import UserOrMember  # noqa: TC001
+from lumina.types import UserOrMember  # ruff: ignore[typing-only-first-party-import]
 from lumina.utils import absolute_send, get_now, sort_birthdays_by_next
 
 if TYPE_CHECKING:
